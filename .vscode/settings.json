@@ -1,0 +1,24 @@
+{
+  "python.linting.enabled": true, // 开启python代码的linting功能
+  "python.linting.flake8Enabled": true, // 开启flake8作为python代码的linter
+  "python.linting.flake8Args": [
+    "--max-line-length=120", // 每行最大字符数为120
+    "--ignore=E203,E266,E501,W503,F401,F403,F405,E402,E303,E231", // 忽略某些错误
+    "--exclude=.venv,.vscode,build,dist" // 不检查某些文件夹
+  ],
+  "[python]": {
+    "editor.formatOnSave": true
+  },
+  // 代码格式化工具
+  "python.formatting.provider": "yapf",
+  "python.formatting.yapfArgs": [
+    "--indent-width",
+    "4",
+    "--no-each-paren",
+    "--column-limit",
+    "120",
+    "--style",
+    "{based_on_style: pep8, column_limit: 120, spaces_around_power_operator: true, blank_line_before_nested_class_or_def: true, split_complex_comprehension: true}"
+  ],
+  "editor.formatOnSave": true
+}

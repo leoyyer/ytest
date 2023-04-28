@@ -1,0 +1,57 @@
+base:
+  id: "321312"
+  base_url: https://fast-test.mypaas.com
+  blacklist: []
+  desc: auto_product 产品实时大屏
+  environment: auto-test
+  project_team: Container group
+  tester: admin
+  debug:
+    - case_1-case_3
+    - case_4
+  global_assertion: []
+  global_variable: []
+  sql_assertion: []
+case:
+  - num: case_1
+    api: /api/screen/641969294082576384/realtime/mks_events
+    assertion:
+      - text: msg=成功;code=2000
+        type: response_body
+      - text: msg=成功;code=2000
+        type: response_body
+    body: null
+    cookies:
+      fast-grafana-auth: 8860716da12ad0b1aded0ebdca8f73ec4ebbc89e
+    desc: null
+    domain: null
+    expected_result:
+      code: 2000
+      data:
+        avg_duration: null
+        finish_ratio: 0
+        items: null
+        processing_num: 0
+        total: 0
+      msg: 成功
+    extract_parameter: null
+    headers:
+      authorization: 8860716da12ad0b1aded0ebdca8f73ec4ebbc89e
+      envcode: prod
+      tenantcode: auto
+      x-fast-tenant: auto
+      x-fast-trace-id: fast-255957f052de260-dc060015f8-17656f48
+      x-fast-user: pengda01
+    is_run: 1
+    level: P1
+    load_data: realtime_mks_events
+    method: GET
+    module: api
+    query:
+      from: "2023-04-14 11:55:33"
+      page_index: 1
+      page_size: 5
+      to: "2023-04-21 11:55:33"
+    setup: null
+    tear_down: null
+    whitelist: []

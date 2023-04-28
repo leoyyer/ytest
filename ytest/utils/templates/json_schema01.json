@@ -1,0 +1,207 @@
+{
+  "title": "Template",
+  "type": "object",
+  "properties": {
+    "base": {
+      "$ref": "#/definitions/Base"
+    },
+    "case": {
+      "title": "Case",
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/Case"
+      }
+    }
+  },
+  "required": ["base", "case"],
+  "definitions": {
+    "Base": {
+      "title": "Base",
+      "type": "object",
+      "properties": {
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "project_team": {
+          "title": "Project Team",
+          "type": "string"
+        },
+        "base_url": {
+          "title": "Base Url",
+          "type": "string"
+        },
+        "environment": {
+          "title": "Environment",
+          "type": "string"
+        },
+        "tester": {
+          "title": "Tester",
+          "type": "string"
+        },
+        "desc": {
+          "title": "Desc",
+          "type": ["string", "null"]
+        },
+        "blacklist": {
+          "title": "Blacklist",
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "global_variable": {
+          "title": "Global Variable",
+          "type": "array",
+          "items": {
+            "type": "object"
+          }
+        },
+        "global_assertion": {
+          "title": "Global Assertion",
+          "type": "array",
+          "items": {
+            "type": "object"
+          }
+        },
+        "sql_assertion": {
+          "title": "Sql Assertion",
+          "type": "array",
+          "items": {
+            "type": "object"
+          }
+        },
+        "debug": {
+          "title": "Debug",
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "required": [
+        "id",
+        "project_team",
+        "base_url",
+        "environment",
+        "tester",
+        "blacklist",
+        "global_variable",
+        "global_assertion",
+        "sql_assertion"
+      ]
+    },
+    "Case": {
+      "title": "Case",
+      "type": "object",
+      "properties": {
+        "num": {
+          "title": "Num",
+          "type": "string"
+        },
+        "load_data": {
+          "title": "Load Data",
+          "type": "string"
+        },
+        "is_run": {
+          "title": "Is Run",
+          "type": "integer"
+        },
+        "module": {
+          "title": "Module",
+          "type": "string"
+        },
+        "level": {
+          "title": "Level",
+          "type": "string"
+        },
+        "desc": {
+          "title": "Desc"
+        },
+        "domain": {
+          "title": "Domain",
+          "type": ["string", "null"]
+        },
+        "api": {
+          "title": "Api",
+          "type": "string"
+        },
+        "method": {
+          "title": "Method",
+          "type": "string"
+        },
+        "headers": {
+          "title": "Headers",
+          "type": "object"
+        },
+        "cookies": {
+          "title": "Cookies",
+          "type": "object"
+        },
+        "query": {
+          "title": "Query",
+          "type": "object"
+        },
+        "body": {
+          "title": "Body",
+          "type": ["object", "null"]
+        },
+        "setup": {
+          "title": "Setup",
+          "type": ["array", "null"],
+          "items": {
+            "type": ["object"]
+          }
+        },
+        "tear_down": {
+          "title": "Tear Down",
+          "type": ["null", "array"],
+          "items": {
+            "type": "object"
+          }
+        },
+        "extract_parameter": {
+          "title": "Extract Parameter",
+          "type": ["object", "null"]
+        },
+        "assertion": {
+          "title": "Assertion",
+          "type": "array",
+          "items": {
+            "type": "object"
+          }
+        },
+        "expected_result": {
+          "title": "Expected Result",
+          "type": "object"
+        },
+        "whitelist": {
+          "title": "Whitelist",
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "required": [
+        "num",
+        "load_data",
+        "is_run",
+        "module",
+        "level",
+        "domain",
+        "api",
+        "method",
+        "headers",
+        "cookies",
+        "query",
+        "setup",
+        "tear_down",
+        "extract_parameter",
+        "assertion",
+        "expected_result",
+        "whitelist"
+      ]
+    }
+  }
+}
