@@ -70,7 +70,6 @@ class MyLog:
         self.logger.removeHandler(self.err_handler)
 
 
-
 logger = MyLog(logger_name=__name__)
 
 def some_function():

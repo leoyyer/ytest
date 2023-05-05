@@ -17,14 +17,14 @@ sys.path.append(base_path)
 import json
 import xlrd
 from utils.logger.logger import MyLog
-import hook_variable
+from common.control import hook_variable
 import re
 import os
 import string
-import exc
-from case.conftest import BLACK_LIST, GLOBAL_VARIABLE,find_json_schema_file
+from common.control import exc
+from case.conftest import BLACK_LIST, GLOBAL_VARIABLE,find_file
 from typing import Dict
-from replace_variable import resolve_vars,str_to_dict
+from common.control.replace_variable import resolve_vars,str_to_dict
 import jsonschema
 
 logger = MyLog(logger_name=__name__)
@@ -45,7 +45,7 @@ class ReadXlsData:
         self.get_sql_detail()
 
     def table_rows(self, n: int) -> xlrd.sheet.Sheet:
-        """[summary]
+        """
         获取指定 sheet 的表格对象
         Args:
             n (int): sheet 的索引
@@ -87,7 +87,7 @@ class ReadXlsData:
             raise exc.CaseGenerateError(f'获取base数据失败,请检查:{e}')
 
     def get_black_list(self):
-        """[summary]
+        """
         从case/coonftest.py中获取黑名单并更新到全局变量 BLACK_LIST 中
         """
         # 获取当前模块的名称
@@ -128,6 +128,7 @@ class ReadXlsData:
             raise exc.CaseGenerateError(f'公共断言生成失败,请检查: {e}')
         
     def get_sql_detail(self):
+        """解析excel中的sql,转换为字典"""
         try:
             table = self.table_rows(4)  # 获取第4个表单的行数和列数
             result_list = []  # 存储所有合法的断言字典
@@ -204,6 +205,7 @@ class ReadXlsData:
         return GLOBAL_VARIABLE
 
     def _get_hook_value(self, value: str) -> any:
+        """解析函数名和参数,执行函数,返回数据"""
         # 解析函数名和参数
         func_list = re.findall(r"(?<=\$\{)(.*)(?=\()", value)
         func_arg = value.split('(')[1].split(')')[0]
@@ -222,7 +224,7 @@ class ReadXlsData:
             return hook_variable.get_hook_variable(hook_list, func_list[0])
 
     def get_case_data(self) -> list:
-        """[summary]
+        """
         获取用例数据
         Returns:
             list: 完整的测试用例
@@ -246,14 +248,15 @@ class ReadXlsData:
                 5: ("desc", resolve_vars(table.cell_value(n, 5),self.global_variable)),
                 6: ("domain", table.cell_value(n, 6) if table.cell_value(n, 6) else self.exl['base']['base_url']),
                 7: ("api", resolve_vars(table.cell_value(n, 7),self.global_variable)),
+                8: ("method",table.cell_value(n, 8)),
                 9: ("headers", str_to_dict(resolve_vars(table.cell_value(n, 9),self.global_variable))),
                 10: ("cookies", str_to_dict(resolve_vars(table.cell_value(n, 10),self.global_variable))),
                 11: ("param", str_to_dict(resolve_vars(table.cell_value(n, 11),self.global_variable))),
                 12: ("body", str_to_dict(resolve_vars(table.cell_value(n, 12),self.global_variable))),
                 13: ("setup", self.update_sql_list(table,n,13) if self.update_sql_list(table,n,13) else []),
-                14: ("treandown", self.update_sql_list(table,n,14) if self.update_sql_list(table,n,14) else []),
-                15: ("extract_data", table.cell_value(n, 15)),
-                16: ("extract_data", self.target_exp_data(self.exl['base']['base_assert'],table.cell_value(n, 16))),
+                14: ("teardown", self.update_sql_list(table,n,14) if self.update_sql_list(table,n,14) else []),
+                15: ("extract_data", self._extract_data(table,n,15)),
+                16: ("expected_data", self.target_exp_data(self.exl['base']['base_assert'],table.cell_value(n, 16))),
                 17: ("response", str_to_dict(table.cell_value(n, 17))),
                 18: ("black_list", str(table.cell_value(n, 18)).split(',') if table.cell_value(n, 18) else []
                     + self.exl['base']['blacklist']),
@@ -266,6 +269,7 @@ class ReadXlsData:
         return self.exl
 
     def update_sql_list(self, table, m, n):
+        """如果setup,treamdown存在sql,则合并sql"""
         new_list = []
         cell_value = table.cell_value(m, n)
         if cell_value:
@@ -283,7 +287,8 @@ class ReadXlsData:
                 return new_list
         
     def validate_case_data(self, case_data):
-        json_schema = find_json_schema_file('ytest','json_schema.json')
+        """检验case是否符合模版"""
+        json_schema = find_file('ytest','json_schema.json')
         with open(json_schema, "r") as f:
             json_schema = json.load(f)
         # 验证 YAML 数据是否符合 JSON Schema
@@ -292,9 +297,19 @@ class ReadXlsData:
         except jsonschema.exceptions.ValidationError as e:
             raise Exception (e.args[0])
 
+    def _extract_data(self, table, m, n):
+        cell_value = table.cell_value(m, n)
+        if cell_value:
+            extract_list = [x for x in cell_value.split(";") if x.strip()]
+        else:
+            extract_list = []
+        return extract_list
+
+
+
 
 if __name__ == '__main__':
-    excel = ReadXlsData("data/fast/suite/fast_auto_product_screen.xlsx")
+    excel = ReadXlsData("data/fast/suite/fast_app_product_screen.xlsx")
     case = excel.get_case_data()
     print(case)
 

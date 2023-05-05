@@ -19,7 +19,7 @@
 '''
 import os
 import importlib
-from exc import CustomError,HookError
+from common.control.exc import CustomError,HookError
 
 BASE_WORKDIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 

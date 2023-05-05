@@ -14,6 +14,11 @@ BLACK_LIST = {}
 GLOBAL_VARIABLE ={}
 NOW_EXCEL_DETAIL = {}
 
+# 项目基础路径
+BASE_WORKDIR = os.path.abspath(os.path.join(os.path.dirname(__file__), os.pardir))
+# 用例基础配置
+CASE_PATH = os.path.join(BASE_WORKDIR, "data")
+
 @pytest.fixture(scope="session")
 def global_variable():
     """预设一些全局变量"""
@@ -28,8 +33,10 @@ def global_black_list():
     return BLACK_LIST
 
 
-def find_json_schema_file(folder, file_name):
+def find_file(folder, file_name):
     for root, dirs, files in os.walk(folder):
-        if 'json_schema.json' in files:
+        if file_name in files:
             return os.path.join(root, file_name)
-    raise FileNotFoundError('文件夹中不存在json_schema.json文件')
+    raise FileNotFoundError(f'文件{file_name},请检查')
+
+

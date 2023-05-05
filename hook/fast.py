@@ -47,12 +47,13 @@ def get_token(url, username, password):
         'account': username,
         'password': "F&4&SEd^$G"
     }
-    response = requests.post(url, headers=headers, json=data)
-    if response.ok:
-        token = response.json()['data']['token']
-        return token
-    else:
-        response.raise_for_status()
+    return 66666
+    # response = requests.post(url, headers=headers, json=data)
+    # if response.ok:
+    #     token = response.json()['data']['token']
+    #     return token
+    # else:
+    #     response.raise_for_status()
 
 
 def generate_overview_time_range():

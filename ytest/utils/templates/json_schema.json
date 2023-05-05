@@ -158,10 +158,11 @@
           "setup": {
             "type": "array"
           },
-          "treandown": {
+          "teardown": {
             "type": "array"
           },
-          "extract_data": {
+          "extract_data": { "type": "array" },
+          "expected_data": {
             "type": "array",
             "items": {
               "type": "object",
