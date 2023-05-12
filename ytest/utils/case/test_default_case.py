@@ -26,10 +26,10 @@ args = parser.parse_args()
 log = MyLog(logger_name=__name__)
 
 class TestSuite(object):
-    
-    # excel = ReadXlsData(args.filename)
+
+    excel = ReadXlsData(args.filename)
     # 写死用于debug
-    excel = ReadXlsData('case/fast/suite/fast_auto_product_screen.xlsx')
+    # excel = ReadXlsData('case/fast/suite/fast_auto_product_screen.xlsx')
     case_detail = excel.get_case_data()
     case_name = case_detail['case_name']
     project = case_detail['project']
@@ -46,7 +46,6 @@ class TestSuite(object):
         
         pass
     
-    
     def teardown_class(cls):
         # 在整个测试类结束后执行的方法
         # allure报告中overview增加描述
@@ -54,10 +53,9 @@ class TestSuite(object):
         # 清理 allure 历史测试数据,重新写入测试结果
         cmd = 'allure generate %s -o %s --clear %s' % (f'report/{TestSuite.project}/debug/xml', f'report/{TestSuite.project}/debug/html', f'report{TestSuite.project}/debug')
         Shell.invoke(cmd)
-
-    
+ 
     @pytest.fixture(autouse=True)
-    def setup_method(self,request):
+    def setup(self,request):
         # 在每个测试用例开始前执行的方法
         # 对需要执行的用例进行函数和sql相关的初始化操作
         is_run = request.node.get_closest_marker('parametrize').args[1][request.node.callspec.indices['case']]['is_run']
@@ -65,10 +63,9 @@ class TestSuite(object):
             setup_data = request.node.get_closest_marker('parametrize').args[1][request.node.callspec.indices['case']]['setup']
             setupteardown.func_run(setup_data,TestSuite.global_variable)
             setupteardown.sql_run(setup_data,TestSuite.case_detail['project'],args.conf,TestSuite.global_variable)
- 
- 
+
     @pytest.fixture(autouse=True)
-    def teardown_method(self,request):
+    def teardown(self,request):
         # 对用例执行完成后进行后置处理,如执行一些sql,或者一些以response为参数的函数处理
         yield
         if hasattr(self, 'response'):

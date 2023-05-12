@@ -39,8 +39,9 @@ def run(filename):
 
 
 if __name__ == '__main__':
-    project = os.path.join(CASE_PATH, 'fast')
-    multi_process_run(project, floder="suite")
+    pass
+    # project = os.path.join(CASE_PATH, 'fast')
+    # multi_process_run(project, floder="suite")
 
     
 
