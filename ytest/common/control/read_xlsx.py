@@ -156,19 +156,22 @@ class ReadXlsData:
         match_list = re.findall(pattern, exp)
         # 遍历结果列表，将每个字符串转换为字典，并添加到字典列表中
         result_list = []
-        for match_str in match_list:
-            match_dict = json.loads(match_str)
-            result_list.append(match_dict)
-        if result_list:
-            # 合并
-            expecte_list = result_list + target_exp
-            # 去重
-            expecte_list = list(set([tuple(d.items()) for d in expecte_list]))
-            # 重组
-            expecte_list = [dict(t) for t in expecte_list]
-        else:
-            expecte_list = target_exp
-        return expecte_list
+        try:
+            for match_str in match_list:
+                match_dict = json.loads(match_str)
+                result_list.append(match_dict)
+            if result_list:
+                # 合并
+                expecte_list = result_list + target_exp
+                # 去重
+                expecte_list = list(set([tuple(d.items()) for d in expecte_list]))
+                # 重组
+                expecte_list = [dict(t) for t in expecte_list]
+            else:
+                expecte_list = target_exp
+            return expecte_list
+        except Exception as e:
+            raise Exception (f"断言解析失败:{match_str} ----> {e}")
 
     def get_variable_data(self) -> Dict[str, any]:
         """
@@ -310,7 +313,8 @@ class ReadXlsData:
 
 if __name__ == '__main__':
     excel = ReadXlsData("data/fast/suite/fast_app_product_screen.xlsx")
-    case = excel.get_case_data()
+    case = excel.get_variable_data()
+    
     print(case)
 
 

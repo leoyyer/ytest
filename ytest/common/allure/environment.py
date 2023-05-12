@@ -7,8 +7,12 @@
 @作者        :Leo
 @版本        :1.0
 '''
+import sys
+import os
+base_path = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+sys.path.append(base_path)
 from jinja2 import Environment, FileSystemLoader
-from common.conf import Config
+from common.conf.conf import Config
 
 
 
@@ -19,7 +23,7 @@ def add_environment(project, path):
         path ([type]): [description]
     """
     conf = Config(project=project)
-    env = Environment(loader=FileSystemLoader("./templates"))
+    env = Environment(loader=FileSystemLoader("ytest/utils/templates"))
     template = env.get_template('environment')
     base_url = conf.get_conf("project", 'base_url')
     project_name = conf.get_conf("project", 'project_name')
@@ -35,4 +39,4 @@ def add_environment(project, path):
 
 
 if __name__ == '__main__':
-    add_environment('/Users/leo/workspace/mingyuanyun/Api_Automation_Test/Report/api/2021-08-30/14-41-58/allure')
+    add_environment('fast','report/allure/test')

@@ -22,7 +22,6 @@ from configparser import ConfigParser
 import sys
 import os
 log_path = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
-print(log_path)
 sys.path.append(log_path)
 from case.conftest import find_file,CASE_PATH
 
@@ -30,7 +29,8 @@ from case.conftest import find_file,CASE_PATH
 
 class Config:
     def __init__(self, project, conf=None):
-        self.config = ConfigParser()
+        # 防止占位符给替换
+        self.config = ConfigParser(interpolation=None)
         self.conf = f"{conf}.ini" if conf is not None else "conf.ini"
         self.conf_path = find_file(os.path.join(CASE_PATH, project), self.conf)
         self.config.read(self.conf_path, encoding='utf-8')
@@ -55,5 +55,5 @@ class Config:
 
 if __name__ == '__main__':
     Ctest = Config('fast')
-    test = Ctest.get_conf('QYWX', 'target_user_id')
+    test = Ctest.get_conf('mysql', 'mysql_passwd')
     print(test)

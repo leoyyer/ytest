@@ -47,17 +47,27 @@ def get_token(url, username, password):
         'account': username,
         'password': "F&4&SEd^$G"
     }
-    return 66666
-    # response = requests.post(url, headers=headers, json=data)
-    # if response.ok:
-    #     token = response.json()['data']['token']
-    #     return token
-    # else:
-    #     response.raise_for_status()
+    # return 66666
+    response = requests.post(url, headers=headers, json=data)
+    if response.ok:
+        token = response.json()['data']['token']
+        return token
+    else:
+        response.raise_for_status()
 
 
-def generate_overview_time_range():
-    pass
+def generate_overview_time_range(space=None,page=None):
+    """
+    overview模块使用
+    """
+    now = datetime.now()
+    today = datetime(now.year, now.month, now.day, 0, 0, 0)
+    data = {"from": str(today), "to": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),}
+    if page:
+        data.update({"page_index": int(page), "page_size": "5"})
+    if space:
+        data.update({"space": int(space)})
+    return json.dumps(data)
 
 
 def get_data(data):
@@ -69,7 +79,7 @@ def generate_time_range(interval, num=None):
     data = {"from": datetime.now().strftime("%Y-%m-%d %H:%M:%S"), "to": (datetime.now() + timedelta(days=int(interval))).replace(hour=23, minute=59, second=59).strftime("%Y-%m-%d %H:%M:%S")}
     if num:
         data.update({"page_index": "1", "page_size": "100", "orders": orders[int(num)]})
-    return json.dumps(data, ensure_ascii=False)
+    return json.dumps(data)
 
 
 def update_data_time(data):
@@ -77,7 +87,10 @@ def update_data_time(data):
     now = datetime.now()
     data['from'] = str(datetime(now.year, now.month, now.day, 0, 0, 0))
     data['to'] = str(datetime(now.year, now.month, now.day, 23, 59, 59))
-    return data
+    return json.dumps(data)
+
+def get_num_data(num):
+    return num
 
 
 if __name__ == '__main__':
