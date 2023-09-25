@@ -89,6 +89,7 @@ def update_data_time(data):
     data['to'] = str(datetime(now.year, now.month, now.day, 23, 59, 59))
     return json.dumps(data)
 
+
 def get_num_data(num):
     return num
 

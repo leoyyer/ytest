@@ -6,4 +6,38 @@
 - 运行单个用例
   - ytest run excel 的绝对路径
 - debug 用例
+
   - 选中 excel 直接点运行
+
+- debug 用例需要配置 launch.json
+
+```
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "debug case",
+      "type": "python",
+      "request": "launch",
+      "cwd": "${workspaceFolder}",
+      "env": {},
+      "envFile": "${workspaceFolder}/.venv",
+      "console": "integratedTerminal",
+      "program": "${workspaceFolder}/ytest/utils/case/test_default_case.py",
+      "args": ["--filename", "${file}"]
+    },
+    {
+      "name": "Python: 当前文件",
+      "type": "python",
+      "request": "launch",
+      "program": "${file}",
+      "console": "integratedTerminal",
+      "justMyCode": true
+    }
+  ]
+}
+
+```
+
+- 其他调试模式
+  ytest/utils/case/test_default_case.py --filename case/fast/suite/fast_app_product_screen.xlsx

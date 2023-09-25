@@ -15,6 +15,8 @@ from case.conftest import get_file_path,CASE_PATH,find_file
 from multiprocessing import Pool
 import time
 from ytest.common.control.shell import Shell
+from functools import partial
+
 
 def multi_process_run(project, floder=None, conf=None):
     """
@@ -23,27 +25,27 @@ def multi_process_run(project, floder=None, conf=None):
     2. 组装参数,废弃原来的用例是否生成判断,默认生成
     """
     case_list = get_file_path(project, floder)
+    print(case_list)
     if conf:
-        conf = f"{conf}.ini" if conf is not None else "conf.ini"
+        _conf = f"{conf}.ini" if conf is not None else "conf.ini"
         # 验证conf.ini文件是否存在
-        find_file(project, conf)
+        find_file(project, _conf)
 
     POOL_SIZE = 3  # 设置最大并发进程数
     with Pool(POOL_SIZE) as pool:
-        pool.map(run, case_list)
+        print('conf',conf)
+        # pool.map(run, case_list, conf)
+        pool.map(partial(run, conf=conf),case_list)
 
 
-def run(filename):
-    cmd = f'python ytest/utils/case/test_default_case.py --filename={filename}'
+def run(filename,conf):
+    cmd = f'python ytest/utils/case/test_default_case.py --filename={filename} --conf={conf}'
     Shell.invoke(cmd)
 
 
 if __name__ == '__main__':
-    pass
-    # project = os.path.join(CASE_PATH, 'fast')
-    # multi_process_run(project, floder="suite")
-
-    
+    project = os.path.join(CASE_PATH, 'fast')
+    multi_process_run(project, floder="suite", conf='test')
 
 
 

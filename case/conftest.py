@@ -11,7 +11,7 @@ import os
 import pytest
 
 BLACK_LIST = {}
-GLOBAL_VARIABLE ={}
+GLOBAL_VARIABLE = {}
 NOW_EXCEL_DETAIL = {}
 
 # 项目基础路径
@@ -19,10 +19,12 @@ BASE_WORKDIR = os.path.abspath(os.path.join(os.path.dirname(__file__), os.pardir
 # 用例基础配置
 CASE_PATH = os.path.join(BASE_WORKDIR, "case")
 
+
 @pytest.fixture(scope="session")
 def global_variable():
     """预设一些全局变量"""
     return {'GLOBAL_VARIABLE': GLOBAL_VARIABLE}
+
 
 @pytest.fixture(scope="session")
 def global_black_list():
@@ -44,7 +46,6 @@ def find_file(folder, file_name):
     Returns:
         _type_: 返回存在文件的绝对路径
     """
-    
     for root, dirs, files in os.walk(folder):
         if file_name in files:
             return os.path.join(root, file_name)
@@ -63,7 +64,6 @@ def get_file_path(folder, file=None):
     ini_files = [f for f in os.listdir(folder) if os.path.isfile(os.path.join(folder, f)) and f.endswith('.ini')]
     if not ini_files:
         raise Exception(f'{folder} 下,ini 配置文件不存在,请检查')
-    
     if file is None:
         # 遍历folder下的全部文件夹，筛选出.xlsx文件
         case_list = []
@@ -76,7 +76,6 @@ def get_file_path(folder, file=None):
         path = os.path.join(folder, file)
         if not os.path.exists(path):
             raise Exception(f'{folder} 下, 文件 {file} 不存在,请检查')
-        
         # 遍历路径下的全部文件夹，筛选出.xlsx文件
         case_list = []
         for root, dirs, files in os.walk(path):
@@ -87,4 +86,3 @@ def get_file_path(folder, file=None):
         return case_list
     else:
         raise Exception(f'{folder} 下不存在测试用例,请检查')
-

@@ -288,7 +288,8 @@ class ReadXlsData:
                 _row = json.loads(resolve_vars(table.cell_value(m, n),self.global_variable))
                 new_list.append(_row)
                 return new_list
-        
+
+      
     def validate_case_data(self, case_data):
         """检验case是否符合模版"""
         json_schema = find_file('ytest','json_schema.json')
@@ -314,7 +315,6 @@ class ReadXlsData:
 if __name__ == '__main__':
     excel = ReadXlsData("data/fast/suite/fast_app_product_screen.xlsx")
     case = excel.get_variable_data()
-    
     print(case)
 
 
