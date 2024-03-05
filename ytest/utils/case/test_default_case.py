@@ -22,16 +22,16 @@ from utils.tools._time import _time
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--filename", type=str, help="配置所需执行的用例路径")
-parser.add_argument("--conf", type=str, help="配置指定的执行文件", default=None)
+parser.add_argument("--conf", type=str, help="配置指定的执行文件", default='conf')
 args = parser.parse_args()
 log = MyLog(logger_name=__name__)
 
 
 class TestSuite(object):
 
-    excel = ReadXlsData(args.filename)
+    # excel = ReadXlsData(args.filename)
     # 写死用于debug
-    # excel = ReadXlsData('case/fast/suite/fast_auto_product_screen.xlsx')
+    excel = ReadXlsData('case/fast/api/fast_auto_product_screen_1.xlsx')
     case_detail = excel.get_case_data()
     case_name = case_detail['case_name']
     project = case_detail['project']
@@ -49,11 +49,11 @@ class TestSuite(object):
 
     def teardown_class(cls):
         # 在整个测试类结束后执行的方法
+        # 清理 allure 历史测试数据,重新写入测试结果
+        cmd = 'allure generate %s -o %s --clear %s' % (f'report/{TestSuite.project}/{args.conf}/{TestSuite.now_time}/xml', f'report/{TestSuite.project}/{args.conf}/{TestSuite.now_time}/html', f'report/{TestSuite.project}/{args.conf}/{TestSuite.now_time}')
+        Shell.invoke(cmd)
         # allure报告中overview增加描述
         add_environment(TestSuite.project, f'report/{TestSuite.project}/{args.conf}/{TestSuite.now_time}')
-        # 清理 allure 历史测试数据,重新写入测试结果
-        cmd = 'allure generate %s -o %s --clear %s' % (f'report/{TestSuite.project}/{args.conf}/{TestSuite.now_time}/xml', f'report/{TestSuite.project}/{args.conf}/{TestSuite.now_time}/html', f'report{TestSuite.project}/{args.conf}/{TestSuite.now_time}')
-        Shell.invoke(cmd)
 
     @pytest.fixture(autouse=True)
     def setup(self,request):
