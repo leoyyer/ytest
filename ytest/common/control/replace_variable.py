@@ -51,4 +51,3 @@ if __name__ == '__main__':
     # variables = {'username': 'pengda01', 'password': 123456.0, 'url': 'https://mks-test.mypaas.com/auth-api/v2/user/login', 'now': None, 'token': '2077c7ed5a0bb7d9d19dc8503d33e4c0be949d9f', 'new_bee': None}
     result = resolve_vars(data, variables)
     print(result)
-    

@@ -39,4 +39,7 @@ def add_environment(project, path):
 
 
 if __name__ == '__main__':
-    add_environment('fast','report/allure/test')
+    add_environment('fast','report/fast/conf/20240305181634')
+    
+    
+    

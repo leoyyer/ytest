@@ -8,16 +8,6 @@
 @版本        :1.0
 '''
 
-#!/usr/bin/env python
-# -*- encoding: utf-8 -*-
-'''
-@文件        :conf.py
-@说明        :
-@时间        :2021/09/09 14:57:04
-@作者        :Leo
-@版本        :1.0
-'''
-
 from configparser import ConfigParser
 import sys
 import os
