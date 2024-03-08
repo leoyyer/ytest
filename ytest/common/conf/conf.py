@@ -21,7 +21,7 @@ class Config:
     def __init__(self, project, conf=None):
         # 防止占位符给替换
         self.config = ConfigParser(interpolation=None)
-        self.conf = f"{conf}.ini" if conf is not None else "conf.ini"
+        self.conf = f"{conf}.ini" if conf is not None else "default.ini"
         self.conf_path = find_file(os.path.join(CASE_PATH, project), self.conf)
         self.config.read(self.conf_path, encoding='utf-8')
 

@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 # -*- encoding: utf-8 -*-
+
+
 import sys
 import os
 base_path = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -15,14 +17,14 @@ from common.control.replace_variable import resolve_vars
 from utils.api.request import RequestInterface
 from utils.assertions.asserts import Assertions
 from utils.extract.extracts import extract
-from common.allure.environment import add_environment
+from common.allure.environment import add_environment,add_categories,add_history_trend
 from common.control.shell import Shell
 from utils.tools._time import _time
 
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--filename", type=str, help="配置所需执行的用例路径")
-parser.add_argument("--conf", type=str, help="配置指定的执行文件", default='conf')
+parser.add_argument("--conf", type=str, help="配置指定的执行文件", default='default')
 args = parser.parse_args()
 log = MyLog(logger_name=__name__)
 
@@ -39,21 +41,15 @@ class TestSuite(object):
     case_list = case_detail['case_list']
     env = conf_path.conf_path
     global_variable = case_detail['base']['global_variable']
-    now_time = _time()
+    run_case_time = _time()
 
     def setup_class(cls):
         # 在整个测试类开始前执行的方法
-        # cmd = 'allure generate %s -o %s --clear %s' % ('report/debug/allure/xml', 'report/debug/allure/html', 'report/debug/allure')
-        # Shell.invoke(cmd)
         pass
 
     def teardown_class(cls):
         # 在整个测试类结束后执行的方法
-        # 清理 allure 历史测试数据,重新写入测试结果
-        cmd = 'allure generate %s -o %s --clear %s' % (f'report/{TestSuite.project}/{args.conf}/{TestSuite.now_time}/xml', f'report/{TestSuite.project}/{args.conf}/{TestSuite.now_time}/html', f'report/{TestSuite.project}/{args.conf}/{TestSuite.now_time}')
-        Shell.invoke(cmd)
-        # allure报告中overview增加描述
-        add_environment(TestSuite.project, f'report/{TestSuite.project}/{args.conf}/{TestSuite.now_time}')
+        pass
 
     @pytest.fixture(autouse=True)
     def setup(self,request):
@@ -75,11 +71,10 @@ class TestSuite(object):
                 teardown_data = request.node.get_closest_marker('parametrize').args[1][request.node.callspec.indices['case']]['teardown']
                 setupteardown.func_run(teardown_data,TestSuite.global_variable)
                 setupteardown.sql_run(teardown_data,TestSuite.case_detail['project'],args.conf,TestSuite.global_variable)
-                # print('----response-----', self.response)
-                # pass
 
-        
+       
     @allure.suite(case_name)
+    @allure.epic(case_name)
     @pytest.mark.parametrize("case", case_list, ids=[case['case_id'] for case in case_list])
     def test_case(self, case):
         case_id, title, is_run, model, level, desc, domain, api, method, headers, cookies, param, body, setup, teardown, extract_data, expected_data, response, black_list = case.values()
@@ -113,5 +108,17 @@ if __name__ == '__main__':
                  "--cache-clear",  # 清除 pytest 缓存
                  "-o log_cli=true",
                  "-o log_cli_level=INFO",
-                 f"--alluredir=report/{TestSuite.project}/{args.conf}/{TestSuite.now_time}/xml"  # 报告的路径
-        ])
+                 f"--alluredir=report/{TestSuite.project}/{args.conf}/{TestSuite.run_case_time}/xml"  # 报告的路径
+    ])
+    # 添加环境配置展示
+    add_environment(TestSuite.project, f'report/{TestSuite.project}/{args.conf}/{TestSuite.run_case_time}')
+    # 添加用例异常分类展示
+    add_categories(f'report/{TestSuite.project}/{args.conf}/{TestSuite.run_case_time}')
+    # 生成 Allure 报告
+    cmd = 'allure generate %s -o %s --clear %s' % (
+        f'report/{TestSuite.project}/{args.conf}/{TestSuite.run_case_time}/xml',
+        f'report/{TestSuite.project}/{args.conf}/{TestSuite.run_case_time}/html',
+        f'report/{TestSuite.project}/{args.conf}/{TestSuite.run_case_time}')
+    Shell.invoke(cmd)
+    # 添加用例的历史执行情况展示
+    add_history_trend(f'report/{TestSuite.project}/{args.conf}/',TestSuite.run_case_time)
