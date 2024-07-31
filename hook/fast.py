@@ -97,5 +97,5 @@ def get_num_data(num):
 if __name__ == '__main__':
     test = generate_time_range(interval=7)
     # test = update_data_time()
-    # test = get_token("https://mks-test.mypaas.com/auth-api/v2/user/login", "pengda01", "123456")
+    test = get_token("https://mks-test.mypaas.com/auth-api/v2/user/login", "pengda01", "123456")
     print(test)

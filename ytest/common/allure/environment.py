@@ -12,7 +12,7 @@ import os
 base_path = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 sys.path.append(base_path)
 from jinja2 import Environment, FileSystemLoader
-from common.conf.conf import Config
+from ytest.common.conf.conf import Config
 import json
 from datetime import datetime
 

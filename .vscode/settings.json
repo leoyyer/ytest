@@ -1,24 +1,48 @@
 {
-  "python.linting.enabled": true, // 开启python代码的linting功能
-  "python.linting.flake8Enabled": true, // 开启flake8作为python代码的linter
-  "python.linting.flake8Args": [
-    "--max-line-length=120", // 每行最大字符数为120
-    "--ignore=E203,E266,E501,W503,F401,F403,F405,E402,E303,E231", // 忽略某些错误
-    "--exclude=.venv,.vscode,build,dist" // 不检查某些文件夹
-  ],
+  // 自动保存文件
+  "files.autoSave": "onWindowChange",
+
+  // 启用 Python 类型检查
+  "python.analysis.typeCheckingMode": "basic",
+
+  // 设置 Prettier 为默认格式化程序
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+
+  // 每次保存时自动格式化代码
+  "editor.formatOnSave": true,
+
+  // 为 Python 文件设置独立的配置
   "[python]": {
+    // 为 Python 文件设置 ms-python.python 作为默认格式化程序
+    "editor.defaultFormatter": "ms-python.python",
+
+    // 每次保存时自动格式化 Python 代码
     "editor.formatOnSave": true
   },
-  // 代码格式化工具
-  "python.formatting.provider": "yapf",
-  "python.formatting.yapfArgs": [
-    "--indent-width",
-    "4",
-    "--no-each-paren",
-    "--column-limit",
-    "120",
-    "--style",
-    "{based_on_style: pep8, column_limit: 120, spaces_around_power_operator: true, blank_line_before_nested_class_or_def: true, split_complex_comprehension: true}"
-  ],
-  "editor.formatOnSave": true
+
+  // 指定使用 Black 作为 Python 格式化工具
+  "python.formatting.provider": "black",
+
+  // Black 的配置参数，设置每行的最大字符数为 88
+  "python.formatting.blackArgs": ["--line-length", "88"],
+
+  // 启用 Python 代码的 linting 功能
+  "python.linting.enabled": true,
+
+  // 启用 flake8 作为 Python 代码的 linter
+  "python.linting.flake8Enabled": true,
+
+  // flake8 的配置参数，设置每行的最大字符数为 88
+  "python.linting.flake8Args": ["--max-line-length=88"],
+  // 启用智能代码补全
+  "editor.quickSuggestions": {
+    "other": true,
+
+    "comments": true,
+    "strings": true
+  },
+  // 启用代码片段
+  "editor.snippetSuggestions": "inline",
+  // 自动换行
+  "terminal.integrated.scrollback": 10000
 }

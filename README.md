@@ -41,3 +41,9 @@
 
 - 其他调试模式
   ytest/utils/case/test_default_case.py --filename case/fast/suite/fast_app_product_screen.xlsx
+
+-- 调试
+本地打包:
+pip install -e .
+
+✗ ytest run -p fast -t api --env test -f fast_auto_product_screen_1

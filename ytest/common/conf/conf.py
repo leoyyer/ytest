@@ -13,7 +13,42 @@ import sys
 import os
 log_path = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 sys.path.append(log_path)
-from case.conftest import find_file,CASE_PATH
+base_path = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
+sys.path.append(base_path)
+print(base_path)
+
+
+# 用例基础配置
+CASE_PATH = os.path.join(base_path, "case")
+
+
+def find_file(folder, file_name):
+    """
+    判断文件是否存在
+    Args:
+        folder (path): 文件的绝对路径
+        file_name (str): 需要判断的文件名
+    Raises:
+        FileNotFoundError: 文件不存在
+
+    Returns:
+        _type_: 返回存在文件的绝对路径
+    """
+    current_folder = os.path.abspath(folder)
+    parent_folder = os.path.dirname(current_folder)
+
+    # 在当前目录查找文件
+    for root, dirs, files in os.walk(current_folder):
+        if file_name in files:
+            return os.path.join(root, file_name)
+
+    # 在父目录查找文件
+    for root, dirs, files in os.walk(parent_folder):
+        if file_name in files:
+            return os.path.join(root, file_name)
+
+    # 文件不存在
+    raise FileNotFoundError(f'{folder}目录及其父目录下,文件{file_name}不存在,请检查')
 
 
 

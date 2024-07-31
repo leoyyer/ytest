@@ -1,0 +1,2 @@
+[console_scripts]
+ytest = ytest.__main__:main

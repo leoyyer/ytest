@@ -1,12 +1,13 @@
 #!/usr/bin/env python
 # -*- encoding: utf-8 -*-
-'''
+"""
 @文件        :exc.py
 @说明        : 
 @时间        :2023/04/24 17:42:53
 @作者        :Leo
 @版本        :1.0
-'''
+"""
+
 
 class CustomError(Exception):
     pass
@@ -77,4 +78,10 @@ class RequestInterfaceError(CustomError):
 
 
 class MongoExecuteError(CustomError):
+    pass
+
+
+class PathExtractionError(Exception):
+    """自定义异常，用于路径提取失败的情况"""
+
     pass

@@ -50,7 +50,7 @@ class TestSuite(object):
             allure.dynamic.description(desc)
             # 动态装载case的严重等级
             allure.severity(consts.CASE_SEVERITY[level])
-            self.log.info(f"用例执行开始 ---> 执行用例: {num}: {title}")
+            self.log.info(f"用例执行开始 -> 执行用例: {num}: {title}")
             # 判断是否需要前置操作
             if setup_data:
                 self.log.info("步骤开始 -> 存在前置步骤,执行前置步骤")
@@ -61,6 +61,7 @@ class TestSuite(object):
             # 对api、headers、入参进行参数化
             self.log.info("步骤开始 -> 处理参数化数据")
             response = self.request.http_request(interface_domain=domain, interface_api=api, headers=headers, cookies=cookies, interface_param=param, interface_query=query, request_type=restype)
+            print('------------',response)
             allure.attach('{}'.format(allure_data(response)), 'response')
             self.log.info("步骤结束 <- 请求成功,返回response")
             data = response
@@ -79,7 +80,7 @@ class TestSuite(object):
                 self.log.info("步骤开始 -> 存在后置操作步骤,执行后置操作")
                 self._teardown(teardown_data)
             allure.attach('{}'.format(allure_data(consts.GLOBAL_VARIABLE)), '全局变量表')
-            self.log.info("用例执行结束 <--- 用例执行成功,更新全局变量表")
+            self.log.info("用例执行结束 <- 用例执行成功,更新全局变量表")
         else:
             pytest.skip("用例等级不符,直接跳过")
 

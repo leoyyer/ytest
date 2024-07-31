@@ -61,7 +61,7 @@ class RequestInterface(object):
                         headers=self.api_data(headers, 'Headers'),
                         cookies=self.api_data(cookies, 'Cookies'),
                         interface_param=self.api_data(interface_query, 'Param'),
-                        interface_json=self.api_data(interface_param, 'Body'))
+                        interface_json=self.api_data(interface_param, '请求Body'))
             else:
                 raise RequestInterfaceError("request_type参数错误")
         except Exception as e:
@@ -80,12 +80,15 @@ class RequestInterface(object):
                     response = requests.request(type, url=get_url, params=temp_interface_param, json=interface_json, headers=headers, cookies=cookies)
                 else:
                     response = requests.request(type, url=get_url, params=temp_interface_param, headers=headers, cookies=cookies)
+                self.api_data(response.text, '响应体')
                 time_consuming = response.elapsed.microseconds / 1000
                 time_total = response.elapsed.total_seconds()
                 response_dicts = dict()
                 response_dicts['status_code'] = response.status_code
+                self.api_data(response.status_code, '状态码')
                 try:
                     response_dicts['body'] = response.json()
+                    
                 except Exception:
                     response_dicts['body'] = ''
                 response_dicts['text'] = response.text
