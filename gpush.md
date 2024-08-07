@@ -5,12 +5,12 @@ https://github.com/pengdaan/ytest.git
 git fetch backup
 
 1. 推送代码到备用仓库 1.切换:
-   git checkout backup-main
+   git checkout backup-dev
 
 2. 添加/推送
    git add .
    git commit "xxxx"
-   git push backup backup/main
+   git push backup backup/dev
 
 创建备份库的分支:
-git checkout -b backup-main backup/main
+git checkout -b backup-dev backup/dev
