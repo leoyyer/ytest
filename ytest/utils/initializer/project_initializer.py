@@ -94,17 +94,15 @@ if __name__ == '__main__':
     def create_dir(self, path):
         if not os.path.exists(path):
             os.makedirs(path)
-            print(f"Created directory: {path}")
         else:
-            print(f"Directory already exists: {path}")
+            pass
 
     def create_file(self, path, content):
         if not os.path.exists(path):
             with open(path, "w") as f:
                 f.write(content)
-            print(f"Created file: {path}")
         else:
-            print(f"File already exists: {path}")
+            pass
 
     def copy_demo_file(self):
         if os.path.exists(self.demo_api_file) or os.path.exists(self.demo_suite_file):
@@ -112,17 +110,15 @@ if __name__ == '__main__':
             suite_dest_file = os.path.join(self.suite_dir, "demo_suite.xlsx")
             if not os.path.exists(api_dest_file):
                 shutil.copy(self.demo_api_file, api_dest_file)
-                print(f"Copied demo_api.xlsx to {api_dest_file}")
             else:
-                print(f"demo_api.xlsx already exists in {api_dest_file}")
+                pass
             if not os.path.exists(suite_dest_file):
                 shutil.copy(self.demo_suite_file, suite_dest_file)
-                print(f"Copied demo_suite.xlsx to {suite_dest_file}")
             else:
-                print(f"demo_suite.xlsx already exists in {suite_dest_file}")
+                pass
 
         else:
-            print(f"demo_api.xlsx or demo_suite.xlsx not found in {self.base_path}")
+            pass
 
     def initialize_project(self):
         # 创建文件夹
@@ -141,6 +137,7 @@ if __name__ == '__main__':
 
         # 拷贝 demo.xlsx 文件
         self.copy_demo_file()
+        print(f"项目{self.project_name}初始化成功!")
 
 
 if __name__ == "__main__":
