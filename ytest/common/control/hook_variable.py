@@ -101,9 +101,7 @@ def get_hook_name(path):
 
 
 if __name__ == "__main__":
-    list = get_hook_name(
-        "/Users/leo/workspace/ytest/case/fast/api/fast_auto_product_screen_1.xlsx"
-    )
+    list = get_hook_name("excel的绝对路径")
     kwargs = {"data": 3, "data2": "two"}
     test = get_hook_variable(list, "generate_overview_time_range", **kwargs)
     test2 = get_hook_variable(list, "auto_commit_file")

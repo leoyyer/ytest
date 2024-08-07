@@ -1,14 +1,15 @@
 #!/usr/bin/env python
 # -*- encoding: utf-8 -*-
-'''
+"""
 @文件        :environment.py
 @说明        :allure报告添加环境描述
 @时间        :2021/08/30 14:51:46
 @作者        :Leo
 @版本        :1.0
-'''
+"""
 import sys
 import os
+
 base_path = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 sys.path.append(base_path)
 from jinja2 import Environment, FileSystemLoader
@@ -18,33 +19,24 @@ from datetime import datetime
 
 
 CATEGORIES = [
-  {
-    "name": "Ignored tests",
-    "matchedStatuses": ["skipped"]
-  },
-  {
-    "name": "Infrastructure problems",
-    "matchedStatuses": ["broken", "failed"],
-    "messageRegex": ".*bye-bye.*"
-  },
-  {
-    "name": "断言异常",
-    "matchedStatuses": ["failed"],
-    "messageRegex": ".*AssertionError.*"
-  },
-  {
-    "name": "Outdated tests",
-    "matchedStatuses": ["broken"],
-    "traceRegex": ".*FileNotFoundException.*"
-  },
-  {
-    "name": "接口异常缺陷",
-    "matchedStatuses": ["failed"]
-  },
-  {
-    "name": "测试异常缺陷",
-    "matchedStatuses": ["broken"]
-  }
+    {"name": "Ignored tests", "matchedStatuses": ["skipped"]},
+    {
+        "name": "Infrastructure problems",
+        "matchedStatuses": ["broken", "failed"],
+        "messageRegex": ".*bye-bye.*",
+    },
+    {
+        "name": "断言异常",
+        "matchedStatuses": ["failed"],
+        "messageRegex": ".*AssertionError.*",
+    },
+    {
+        "name": "Outdated tests",
+        "matchedStatuses": ["broken"],
+        "traceRegex": ".*FileNotFoundException.*",
+    },
+    {"name": "接口异常缺陷", "matchedStatuses": ["failed"]},
+    {"name": "测试异常缺陷", "matchedStatuses": ["broken"]},
 ]
 
 
@@ -56,16 +48,21 @@ def add_environment(project, path):
     """
     conf = Config(project=project)
     env = Environment(loader=FileSystemLoader("ytest/utils/templates"))
-    template = env.get_template('environment')
-    base_url = conf.get_conf("project", 'base_url')
-    project_name = conf.get_conf("project", 'project_name')
-    project_team = conf.get_conf('project', "project_team")
-    tester = conf.get_conf('project', 'tester')
+    template = env.get_template("environment")
+    base_url = conf.get_conf("project", "base_url")
+    project_name = conf.get_conf("project", "project_name")
+    project_team = conf.get_conf("project", "project_team")
+    tester = conf.get_conf("project", "tester")
     # 生成对应的用例名
-    filename = 'environment.properties'
+    filename = "environment.properties"
     # 模版内容生成
-    content = template.render(base_url=base_url, project_name=project_name, project_team=project_team, tester=tester)
-    with open(path + '/' + filename, 'w', encoding='utf-8') as fp:
+    content = template.render(
+        base_url=base_url,
+        project_name=project_name,
+        project_team=project_team,
+        tester=tester,
+    )
+    with open(path + "/" + filename, "w", encoding="utf-8") as fp:
         fp.write(content)
         fp.close()
 
@@ -76,8 +73,8 @@ def add_categories(path):
     Args
         path (_type_): _description_
     """
-    filename = 'categories.json'
-    with open(path + '/' + filename, 'w', encoding='utf-8') as fp:
+    filename = "categories.json"
+    with open(path + "/" + filename, "w", encoding="utf-8") as fp:
         json.dump(CATEGORIES, fp, ensure_ascii=False, indent=4)
 
 
@@ -123,19 +120,23 @@ def merge_history_trend(base_path, current_timestamp, timestamp_folders):
     Returns:
         dict: 合并后的 history-trend.json 数据
     """
-    now_trend_path = os.path.join(base_path, current_timestamp, 'html', 'widgets', 'history-trend.json')
-    with open(now_trend_path, 'r', encoding='utf-8') as file:
+    now_trend_path = os.path.join(
+        base_path, current_timestamp, "html", "widgets", "history-trend.json"
+    )
+    with open(now_trend_path, "r", encoding="utf-8") as file:
         now_trend_data = json.load(file)
-        now_trend_data[0]['buildOrder'] = convert_to_month_day(current_timestamp)
-    current_history_trend = {'items': now_trend_data}  # 初始化为最新报告中的执行情况
+        now_trend_data[0]["buildOrder"] = convert_to_month_day(current_timestamp)
+    current_history_trend = {"items": now_trend_data}  # 初始化为最新报告中的执行情况
     # 遍历时间戳文件夹列表
     for timestamp_folder in timestamp_folders:
-        history_trend_path = os.path.join(base_path, timestamp_folder, 'html', 'widgets', 'history-trend.json')
+        history_trend_path = os.path.join(
+            base_path, timestamp_folder, "html", "widgets", "history-trend.json"
+        )
         # 判断文件是否存在
         if not os.path.exists(history_trend_path):
             continue
         # 读取 history-trend.json 文件数据
-        with open(history_trend_path, 'r', encoding='utf-8') as file:
+        with open(history_trend_path, "r", encoding="utf-8") as file:
             history_trend_data = json.load(file)
             if current_history_trend is None:
                 current_history_trend = history_trend_data
@@ -145,12 +146,16 @@ def merge_history_trend(base_path, current_timestamp, timestamp_folders):
                     # 逐个添加列表中的字典元素
                     for item in history_trend_data:
                         if isinstance(item, dict):
-                            item['buildOrder'] = convert_to_month_day(timestamp_folder)
-                            current_history_trend['items'].append(item)
+                            item["buildOrder"] = convert_to_month_day(timestamp_folder)
+                            current_history_trend["items"].append(item)
                         else:
-                            print(f"Warning: history-trend.json in {timestamp_folder} contains invalid data.")
+                            print(
+                                f"Warning: history-trend.json in {timestamp_folder} contains invalid data."
+                            )
                 else:
-                    print(f"Warning: history-trend.json in {timestamp_folder} is not a list.")
+                    print(
+                        f"Warning: history-trend.json in {timestamp_folder} is not a list."
+                    )
 
     return current_history_trend
 
@@ -163,20 +168,28 @@ def write_history_trend(data, base_path, timestamp_folder):
         base_path (_type_): 报告路径
         timestamp_folder (_type_): 最新的报告时间戳
     """
-    file_path = os.path.join(base_path, timestamp_folder, 'html', 'widgets', 'history-trend.json')
+    file_path = os.path.join(
+        base_path, timestamp_folder, "html", "widgets", "history-trend.json"
+    )
     # 将新的字典转换成 JSON 格式
-    json_data = json.dumps(data['items'], indent=4,ensure_ascii=False,)
+    json_data = json.dumps(
+        data["items"],
+        indent=4,
+        ensure_ascii=False,
+    )
     # 写入到 history-trend.json 文件中
-    with open(file_path, 'w') as file:
+    with open(file_path, "w") as file:
         file.write(json_data)
 
 
-def add_history_trend(base_path,current_timestamp):
+def add_history_trend(base_path, current_timestamp):
     timestamp_folders = get_previous_timestamp_folders(base_path, current_timestamp)
-    merged_history_trend = merge_history_trend(base_path, current_timestamp, timestamp_folders)
-    write_history_trend(merged_history_trend,base_path,current_timestamp)
-  
+    merged_history_trend = merge_history_trend(
+        base_path, current_timestamp, timestamp_folders
+    )
+    write_history_trend(merged_history_trend, base_path, current_timestamp)
 
-if __name__ == '__main__':
-    add_environment('fast','report/fast/default')
-    add_history_trend('report/fast/default', '20240307175354')
+
+if __name__ == "__main__":
+    add_environment("demo", "report/demo/default")
+    add_history_trend("report/demo/default", "20240307175354")

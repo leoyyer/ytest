@@ -44,5 +44,5 @@
   // 启用代码片段
   "editor.snippetSuggestions": "inline",
   // 自动换行
-  "terminal.integrated.scrollback": 10000
+  "terminal.integrated.scrollback": 1000
 }

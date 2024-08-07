@@ -19,7 +19,6 @@ from utils.assertions.asserts import Assertions
 from utils.extract.extracts import extract
 from utils.tools._time import _time
 
-
 parser = argparse.ArgumentParser()
 parser.add_argument("--filename", type=str, help="配置所需执行的用例路径")
 parser.add_argument("--conf", type=str, help="配置指定的执行文件", default="default")
@@ -28,7 +27,7 @@ log = MyLog(logger_name=__name__)
 
 
 class TestSuite(object):
-    args.filename = "case/fast/api/fast_auto_product_screen_1.xlsx"
+    # args.filename = "调试入口,写死excel绝对路径可执行"
     excel = ReadXlsData(args.filename)
     case_detail = excel.get_case_data()
     case_name = case_detail["case_name"]

@@ -11,6 +11,7 @@ import os, sys
 import pytest
 import importlib
 
+
 base_path = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 sys.path.append(base_path)
 from common.allure.environment import add_environment, add_categories, add_history_trend
@@ -19,18 +20,13 @@ from common.control.shell import Shell
 
 BLACK_LIST = {}
 GLOBAL_VARIABLE = {}
-NOW_EXCEL_DETAIL = {}
-
-# 项目基础路径
-BASE_WORKDIR = os.path.abspath(os.path.join(os.path.dirname(__file__), os.pardir))
-# 用例基础配置
-CASE_PATH = os.path.join(BASE_WORKDIR, "case")
 
 
 @pytest.fixture(scope="session")
 # 整个测试会话(session)中只执行一次 fixture 函数。
 def global_variable():
     """预设一些全局变量"""
+    GLOBAL_VARIABLE = {"1": 2}
     return {"GLOBAL_VARIABLE": GLOBAL_VARIABLE}
 
 
@@ -46,7 +42,7 @@ def pytest_configure(config):
     """
     在pytest 运行前被调用一次，主要用于在测试运行之前进行配置和初始化工作。
     """
-    config.my_var = "hello world"
+    pass
 
 
 def pytest_collection_modifyitems(config, items):
@@ -58,18 +54,17 @@ def pytest_collection_modifyitems(config, items):
         2. 把func结果返回到hook_result
         3. 往每个用例的global_variable中传入hook_result,达到部分参数需要在default.py中初始化的目的
     """
-    print("-------------", config.invocation_params.args[5])
-    config.rootdir.strpath
+
     hook_result = {}
     # 获取 hook.default 模块中的所有函数并执行
-    module = importlib.import_module("hook.default")
+    module = importlib.import_module("case.public")
     for name in dir(module):
         func = getattr(module, name)
         if callable(func):
             # 执行函数并捕获结果
             result = func()
             # 将结果添加到 hook_result 列表中
-            hook_result[f"default_{name}"] = result
+            hook_result[f"public_{name}"] = result
     for item in items:
         item.cls.global_variable.update(hook_result)
 
@@ -121,7 +116,6 @@ def pytest_runtest_makereport(item, call):
     """
     1. 预留入口,用于修改用例执行完成还没生成allure的数据时变更数据的入口
     """
-    print(call)
     outcome = yield
     report = outcome.get_result()
 
@@ -129,7 +123,6 @@ def pytest_runtest_makereport(item, call):
         # 检查测试项是否有参数
         if "case" in item.fixturenames:
             # 从报告中删除参数部分
-            print(report.caplog)
             report.sections = [
                 section for section in report.sections if "Parameters" not in section
             ]

@@ -3,23 +3,26 @@ import os
 import time
 import inspect
 
+
 class MyLog:
-    def __init__(self, level='default', logger_name=__name__):
-        self.path = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
-        self.log_file = os.path.join(self.path, 'Log', 'log.log')
-        self.err_file = os.path.join(self.path, 'Log', 'err.log')
+    def __init__(self, level="default", logger_name=__name__):
+        self.path = os.path.dirname(
+            os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+        )
+        self.log_file = os.path.join(self.path, "Log", "log.log")
+        self.err_file = os.path.join(self.path, "Log", "err.log")
         self.logger = logging.getLogger(__name__)
         self.logger.setLevel(logging.DEBUG)
-        self.date = '%Y-%m-%d %H:%M:%S'
+        self.date = "%Y-%m-%d %H:%M:%S"
         self._create_file(self.log_file)
         self._create_file(self.err_file)
 
-        self.handler = logging.FileHandler(self.log_file, encoding='utf-8')
-        self.err_handler = logging.FileHandler(self.err_file, encoding='utf-8')
+        self.handler = logging.FileHandler(self.log_file, encoding="utf-8")
+        self.err_handler = logging.FileHandler(self.err_file, encoding="utf-8")
         self.handler.setLevel(logging.DEBUG)
         self.err_handler.setLevel(logging.ERROR)
 
-        self.formatter = logging.Formatter('%(asctime)s %(levelname)s %(message)s')
+        self.formatter = logging.Formatter("%(asctime)s %(levelname)s %(message)s")
         self.handler.setFormatter(self.formatter)
         self.err_handler.setFormatter(self.formatter)
 
@@ -31,7 +34,7 @@ class MyLog:
         if not os.path.isdir(path):
             os.makedirs(path)
         if not os.path.isfile(filename):
-            with open(filename, mode='w', encoding='utf-8'):
+            with open(filename, mode="w", encoding="utf-8"):
                 pass
 
     def debug(self, log_meg):
@@ -70,22 +73,10 @@ class MyLog:
         self.logger.removeHandler(self.err_handler)
 
 
-logger = MyLog(logger_name=__name__)
-
-
-def some_function():
-    logger.debug('This is a debug message')
-    logger.info('This is an info message')
-    logger.warning('This is a warning message')
-    logger.error('This is an error message')
-    logger.critical('This is a critical message')
-
-
 if __name__ == "__main__":
-    MyLog = MyLog()
-    MyLog.debug("This is debug message")
-    MyLog.info("This is info message")
-    MyLog.warning("This is warning message")
-    MyLog.error("This is error")
-    MyLog.critical("This is critical message")
-    some_function()
+    logger = MyLog(logger_name=__name__)
+    logger.debug("This is a debug message")
+    logger.info("This is an info message")
+    logger.warning("This is a warning message")
+    logger.error("This is an error message")
+    logger.critical("This is a critical message")

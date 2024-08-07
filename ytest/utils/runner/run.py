@@ -20,6 +20,8 @@ from ytest.common.control.shell import Shell
 from functools import partial
 from ytest.utils.case.case_file import get_file_path, find_file
 
+global_project = None  # 定义一个全局变量
+
 
 def multi_process_run(project, floder=None, conf=None):
     """
@@ -36,8 +38,6 @@ def multi_process_run(project, floder=None, conf=None):
 
     POOL_SIZE = 3  # 设置最大并发进程数
     with Pool(POOL_SIZE) as pool:
-        # print('conf',conf)
-        # pool.map(run, case_list, conf)
         pool.map(partial(run, conf=conf), case_list)
 
 
@@ -55,5 +55,5 @@ def run(filename, conf):
 
 
 if __name__ == "__main__":
-    project = os.path.join("case", "fast")
+    project = os.path.join("case", "demo")
     multi_process_run(project, floder="suite", conf="test")

@@ -27,7 +27,6 @@ import string
 from common.control import exc
 from ytest.utils.case.conftest import BLACK_LIST, GLOBAL_VARIABLE
 from ytest.utils.case.case_file import find_file
-from typing import Dict
 from common.control.replace_variable import resolve_vars, str_to_dict
 import jsonschema
 
@@ -203,6 +202,7 @@ class ReadXlsData:
         """
         variable 变量池生成
         """
+
         # 获取变量表
         table = self.table_rows(2)
         type_converter = {
@@ -215,23 +215,41 @@ class ReadXlsData:
         try:
             # 遍历变量表中的每一行
             for n in range(1, table.nrows):
-                # 根据变量类型更新全局变量池
                 var_type = table.cell_value(n, 2)
-                if var_type in type_converter:
-                    value = table.cell_value(n, 1)
-                    if var_type == "func":
-                        value = type_converter[var_type](value)
+                if var_type:
+                    if var_type in type_converter:
+                        value = table.cell_value(n, 1)
+                        try:
+                            if var_type == "func":
+                                value = type_converter[var_type](value)
+                            else:
+                                value = type_converter[var_type](value)
+                            GLOBAL_VARIABLE[f"{table.cell_value(n, 0)}"] = value
+                        except (ValueError, KeyError) as e:
+                            logger.error(
+                                f"类型转换失败, 请检查变量表。变量类型: {var_type}, 变量值: {value}, 异常信息: {e}"
+                            )
+                            raise exc.ReadXlsError(
+                                f"类型转换失败, 请检查变量表。变量类型: {var_type}, 变量值: {value}, 异常信息: {e}"
+                            )
                     else:
-                        value = type_converter[var_type](value)
-                    GLOBAL_VARIABLE[f"{table.cell_value(n, 0)}"] = value
-                else:
-                    GLOBAL_VARIABLE[f"{table.cell_value(n, 0)}"] = json.loads(
-                        table.cell_value(n, 1)
-                    )
+                        value = table.cell_value(n, 1)
+                        try:
+                            GLOBAL_VARIABLE[f"{table.cell_value(n, 0)}"] = json.loads(
+                                value
+                            )
+                        except json.JSONDecodeError as e:
+                            logger.error(
+                                f"JSON 解析失败, 请检查变量表。变量类型: {var_type}, 变量值: {value}, 异常信息: {e}"
+                            )
+                            raise exc.ReadXlsError(
+                                f"JSON 解析失败, 请检查变量表。变量类型: {var_type}, 变量值: {value}, 异常信息: {e}"
+                            )
         except (ValueError, KeyError) as e:
-            logger.error(f"类型转换失败,请检查变量表。{e}")
-            raise exc.ReadXlsError(f"类型转换失败,请检查变量表。{e}")
-        # 返回更新后的全局变量池,且更新全局变量到base中
+            logger.error(f"类型转换失败, 请检查变量表。异常信息: {e}")
+            raise exc.ReadXlsError(f"类型转换失败, 请检查变量表。异常信息: {e}")
+
+        # 返回更新后的全局变量池, 且更新全局变量到 base 中
         self.exl["base"].update({"global_variable": GLOBAL_VARIABLE})
         return GLOBAL_VARIABLE
 
@@ -435,6 +453,6 @@ class ReadXlsData:
 
 
 if __name__ == "__main__":
-    excel = ReadXlsData("data/fast/suite/fast_app_product_screen.xlsx")
+    excel = ReadXlsData("excel用例的绝对路径")
     case = excel.get_variable_data()
     print(case)

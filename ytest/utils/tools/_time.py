@@ -1,15 +1,14 @@
 #!/usr/bin/env python
 # -*- encoding: utf-8 -*-
-'''
+"""
 @文件        :_time.py
 @说明        :
 @时间        :2023/07/28 18:48:02
 @作者        :Leo
 @版本        :1.0
-'''
+"""
 
 from datetime import datetime
-
 
 
 def _time():

@@ -47,5 +47,24 @@ def generated_uuid(user):
     user_code = f"{user}-{uuid_str}"
     return user_code
 
-if __name__ == '__main__':
-    generate_now_time()
+
+def generate_overview_time_range(space=None, page=None):
+    """
+    overview模块使用
+    """
+    now = datetime.now()
+    today = datetime(now.year, now.month, now.day, 0, 0, 0)
+    data = {
+        "from": str(today),
+        "to": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+    }
+    if page:
+        data.update({"page_index": int(page), "page_size": "5"})
+    if space:
+        data.update({"space": int(space)})
+    return json.dumps(data)
+
+
+if __name__ == "__main__":
+    print(generate_time_range(1))
+    print(generate_id("admin"))
