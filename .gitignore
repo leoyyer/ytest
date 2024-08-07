@@ -1,1 +1,9 @@
 /report
+/test
+ytest.egg-info
+__pycache__
+.pytest_cache
+.test
+.vscode
+log
+venv
