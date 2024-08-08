@@ -19,7 +19,7 @@ setup(
     package_data={
         "ytest": [
             "utils/initializer/demo_suite.xlsx",
-            "ytest/utils/initializer/demo_api.xlsx",
+            "utils/initializer/demo_api.xlsx",
         ],  # 指定需要打包的文件
     },
     classifiers=[
