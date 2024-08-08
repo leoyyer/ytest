@@ -1,9 +1,11 @@
 from setuptools import setup, find_packages
 
+# 确保打包时包含包内的所有数据文件
+include_package_data = (True,)
+
 # 读取 README 文件
 with open("README.md", "r", encoding="utf-8") as fh:
     long_description = fh.read()
-
 setup(
     name="ytest",
     version="0.1.0",
@@ -14,6 +16,12 @@ setup(
     long_description=long_description,
     long_description_content_type="text/markdown",
     packages=find_packages(),
+    package_data={
+        "ytest": [
+            "utils/initializer/demo_suite.xlsx",
+            "ytest/utils/initializer/demo_api.xlsx",
+        ],  # 指定需要打包的文件
+    },
     classifiers=[
         "Programming Language :: Python :: 3",
         "License :: OSI Approved :: MIT License",
