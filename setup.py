@@ -10,6 +10,7 @@ setup(
     author="leo",
     author_email="your.email@example.com",
     description="auto api test",
+    url="https://github.com/leoyyer/ytest",
     long_description=long_description,
     long_description_content_type="text/markdown",
     packages=find_packages(),
