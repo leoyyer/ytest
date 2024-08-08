@@ -55,7 +55,8 @@ setup(
         "xlrd==1.2.0",
         "xlutils==2.0.0",
         "xlwt==1.3.0",
-        "zipp==3.15.0"
+        "zipp==3.15.0",
+        "pandas==2.2.2"
 
     ],
     entry_points={
