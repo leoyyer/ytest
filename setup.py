@@ -10,6 +10,7 @@ setup(
     author="leo",
     author_email="your.email@example.com",
     description="auto api test",
+    url="https://github.com/leoyyer/ytest",
     long_description=long_description,
     long_description_content_type="text/markdown",
     packages=find_packages(),
@@ -18,7 +19,7 @@ setup(
         "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent",
     ],
-    python_requires='>=3.6',
+    python_requires=">=3.6",
     install_requires=[
         "allure-pytest==2.13.5",
         "allure-python-commons==2.13.5",
@@ -55,12 +56,12 @@ setup(
         "xlrd==1.2.0",
         "xlutils==2.0.0",
         "xlwt==1.3.0",
-        "zipp==3.15.0"
-
+        "zipp==3.15.0",
+        "pandas==2.2.2",
     ],
     entry_points={
-        'console_scripts': [
-            'ytest=ytest.__main__:main',
+        "console_scripts": [
+            "ytest=ytest.__main__:main",
         ]
-    }
+    },
 )
