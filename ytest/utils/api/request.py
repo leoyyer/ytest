@@ -10,9 +10,9 @@
 import requests
 import json
 import allure
-from utils.logger.logger import MyLog
-from common.allure.allure_conf import allure_data
-from common.control.exc import RequestInterfaceError
+from ytest.utils.logger.logger import MyLog
+from ytest.common.allure.allure_conf import allure_data
+from ytest.common.control.exc import RequestInterfaceError
 
 REQUESTS_LIST = ["GET", "POST", "PUT", "DELETE"]
 

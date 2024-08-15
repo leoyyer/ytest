@@ -8,7 +8,7 @@
 @版本        :1.0
 """
 
-from utils.logger.logger import MyLog
+from ytest.utils.logger.logger import MyLog
 import jsonpath
 
 log = MyLog(logger_name=__name__)

@@ -57,7 +57,7 @@ def pytest_collection_modifyitems(config, items):
 
     hook_result = {}
     # 获取 hook.default 模块中的所有函数并执行
-    module = importlib.import_module("case.public")
+    module = importlib.import_module("public")
     for name in dir(module):
         func = getattr(module, name)
         if callable(func):

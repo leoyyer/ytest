@@ -7,7 +7,7 @@
 @作者        :Leo
 @版本        :1.0
 """
-import os
+import os, sys
 
 
 def find_file(folder, file_name):
@@ -67,3 +67,15 @@ def get_file_path(folder, file=None):
         return case_list
     else:
         raise Exception(f"{folder} 下不存在测试用例,请检查")
+
+
+def find_folder(folder_name, start_path=None):
+    if start_path is None:
+        start_path = os.path.abspath(".")
+
+    for root, dirs, files in os.walk(start_path):
+        if folder_name in dirs:
+            folder_path = os.path.join(root, folder_name)
+            sys.path.append(folder_path)
+            return folder_path
+    raise Exception(f"项目不存在{folder_name},请检查！")

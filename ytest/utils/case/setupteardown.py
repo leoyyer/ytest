@@ -7,9 +7,9 @@
 @作者        :Leo
 @版本        :1.0
 """
-from common.control import hook_variable
-from common.control import exc
-from utils.db import mysql
+from ytest.common.control import hook_variable
+from ytest.common.control import exc
+from ytest.utils.db import mysql
 import re
 import string
 
