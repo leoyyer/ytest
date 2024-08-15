@@ -9,15 +9,15 @@ sys.path.append(base_path)
 import pytest
 import allure
 import argparse
-from common.conf.conf import Config
-from common.control.read_xlsx import ReadXlsData
-from utils.logger.logger import MyLog
-from utils.case import setupteardown
-from common.control.replace_variable import resolve_vars
-from utils.api.request import RequestInterface
-from utils.assertions.asserts import Assertions
-from utils.extract.extracts import extract
-from utils.tools._time import _time
+from ytest.common.conf.conf import Config
+from ytest.common.control.read_xlsx import ReadXlsData
+from ytest.utils.logger.logger import MyLog
+from ytest.utils.case import setupteardown
+from ytest.common.control.replace_variable import resolve_vars
+from ytest.utils.api.request import RequestInterface
+from ytest.utils.assertions.asserts import Assertions
+from ytest.utils.extract.extracts import extract
+from ytest.utils.tools._time import _time
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--filename", type=str, help="配置所需执行的用例路径")

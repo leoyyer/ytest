@@ -19,15 +19,15 @@ sys.path.append(log_path)
 sys.path.append(base_path)
 import json
 import xlrd
-from utils.logger.logger import MyLog
-from common.control import hook_variable
+from ytest.utils.logger.logger import MyLog
+from ytest.common.control import hook_variable
 import re
 import os
 import string
-from common.control import exc
+from ytest.common.control import exc
 from ytest.utils.case.conftest import BLACK_LIST, GLOBAL_VARIABLE
 from ytest.utils.case.case_file import find_file
-from common.control.replace_variable import resolve_vars, str_to_dict
+from ytest.common.control.replace_variable import resolve_vars, str_to_dict
 import jsonschema
 
 logger = MyLog(logger_name=__name__)

@@ -16,6 +16,7 @@ sys.path.append(base_path)
 from ytest.utils.runner.run import multi_process_run, run
 from ytest.utils.initializer.project_initializer import ProjectInitializer
 from ytest.utils.tools.case_bloat import CaseBloat
+from ytest.utils.case.case_file import find_folder
 
 
 __version__ = "1.0.0"
@@ -85,8 +86,8 @@ def run_command(project, type, filename, env, process):
         project = os.path.join("case", project)
         multi_process_run(project=project, floder=type, conf=env)
     else:
-        base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-        script_path = os.path.join(base_dir, "case", project, type, f"{filename}.xlsx")
+        case_path = find_folder("case")
+        script_path = os.path.join(case_path, project, type, f"{filename}.xlsx")
         run(script_path, env)
 
 

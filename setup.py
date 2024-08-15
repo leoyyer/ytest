@@ -10,7 +10,6 @@ setup(
     name="ytest",
     version="0.1.0",
     author="leo",
-    author_email="your.email@example.com",
     description="auto api test",
     url="https://github.com/leoyyer/ytest",
     long_description=long_description,
@@ -20,6 +19,8 @@ setup(
         "ytest": [
             "utils/initializer/demo_suite.xlsx",
             "utils/initializer/demo_api.xlsx",
+            "utils/templates/json_schema.json",
+            "utils/templates/environment",
         ],  # 指定需要打包的文件
     },
     classifiers=[
