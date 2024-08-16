@@ -67,6 +67,7 @@ setup(
         "xlwt==1.3.0",
         "zipp==3.15.0",
         "pandas==2.2.2",
+        "openpyxl==3.1.5",
     ],
     entry_points={
         "console_scripts": [
