@@ -17,6 +17,7 @@ from ytest.utils.tools._time import _time
 parser = argparse.ArgumentParser()
 parser.add_argument("--filename", type=str, help="配置所需执行的用例路径")
 parser.add_argument("--conf", type=str, help="配置指定的执行文件", default="default")
+parser.add_argument("--type", type=str, help="执行策略", default="")
 args = parser.parse_args()
 log = MyLog(logger_name=__name__)
 
@@ -155,12 +156,13 @@ if __name__ == "__main__":
     else:
         pytest.main(
             [
-                "-s",
-                "-v",
-                "--cache-clear",  # 清除 pytest 缓存
+                "-q",  # 安静模式运行
+                "--cache-clear",  # 清除 pytest 缓存,确保测试环境干净。
                 "-o log_cli=true",
-                "-o log_cli_level=INFO",
+                "-o log_cli_level=INFO",  # 在控制台中显示INFO级别的日志
                 "--tb=short",
+                "--disable-warnings",  # 禁用测试中的警告输出
+                "--maxfail=3",  # 在3个失败之后停止测试
                 "--pyargs",
                 "ytest.utils.case.test_default_case",  # 注意这里的格式
                 f"--alluredir=report/{TestSuite.project}/{args.conf}/{TestSuite.run_case_time}/xml",  # 报告的路径

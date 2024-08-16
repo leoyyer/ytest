@@ -20,6 +20,8 @@ from ytest.utils.case.conftest import BLACK_LIST, GLOBAL_VARIABLE
 from ytest.utils.case.case_file import find_file
 from ytest.common.control.replace_variable import resolve_vars, str_to_dict
 import jsonschema
+from ytest.utils.conf import config
+
 
 logger = MyLog(logger_name=__name__)
 
@@ -424,7 +426,7 @@ class ReadXlsData:
 
     def validate_case_data(self, case_data):
         """检验 case 是否符合模版"""
-        json_schema = find_file("ytest", "json_schema.json")
+        json_schema = find_file(config.ytest_path, "json_schema.json")
         with open(json_schema, "r") as f:
             json_schema = json.load(f)
         # 验证数据是否符合 JSON Schema

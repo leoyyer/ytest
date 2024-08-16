@@ -140,6 +140,7 @@ def run_command(project, filename, value):
     filename = filename if filename.endswith(".xlsx") else f"{filename}.xlsx"
     api_case = CaseBloat(project, filename, value)
     api_case.parse_excel_and_generate_tests()
+    print(f"执行成功,请重新打开用例{filename}查看")
 
 
 if __name__ == "__main__":

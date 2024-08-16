@@ -11,7 +11,6 @@ import os, sys
 
 
 def find_file(folder, file_name):
-    print(folder, file_name)
     """
     判断文件是否存在
     Args:

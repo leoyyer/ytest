@@ -91,11 +91,11 @@ def pytest_sessionfinish(session, exitstatus):
     """
     # 获取命令行参数的值
     # 使用生成器表达式来判断
-    contains_alluredir = any(
-        "--alluredir" in arg for arg in session.config.invocation_params.args
-    )
-    if contains_alluredir:
-        args = session.config.invocation_params.args[8]
+    alluredir_args = [
+        arg for arg in session.config.invocation_params.args if "--alluredir" in arg
+    ]
+    if len(alluredir_args) > 0:
+        args = alluredir_args[0]
         # 解析参数
         _, report_dir = args.split("--alluredir=")
         values = report_dir.split("/")
