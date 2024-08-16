@@ -9,21 +9,9 @@
 """
 
 from configparser import ConfigParser
-import sys
 import os
 
-log_path = os.path.dirname(
-    os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-)
-sys.path.append(log_path)
-base_path = os.path.dirname(
-    os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-)
-sys.path.append(base_path)
-
-
-# 用例基础配置
-CASE_PATH = os.path.join(base_path, "case")
+from ytest.utils.conf import config
 
 
 def find_file(folder, file_name):
@@ -60,7 +48,7 @@ class Config:
         # 防止占位符给替换
         self.config = ConfigParser(interpolation=None)
         self.conf = f"{conf}.ini" if conf is not None else "default.ini"
-        self.conf_path = find_file(os.path.join(CASE_PATH, project), self.conf)
+        self.conf_path = find_file(os.path.join(config.case_path, project), self.conf)
         self.config.read(self.conf_path, encoding="utf-8")
 
     def get_conf(self, title, value):

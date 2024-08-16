@@ -39,6 +39,9 @@ class CaseBloat:
         for index, row in df_inflation.iterrows():
             key = row.iloc[0]
             value = row.iloc[1]
+            # 检查 value 是否为空（NaN）
+            if pd.isna(value):
+                continue
             try:
                 # 确保 JSON 字符串使用双引号
                 value = value.replace("'", '"')
@@ -89,7 +92,10 @@ class CaseBloat:
             and self.boundary_values == {}
             and self.decision_table == []
             and self.error_guessing == {}
+            and self.original_json == {}
         ):
+            pass
+        elif self.original_json == {}:
             pass
         else:
             # 生成测试用例

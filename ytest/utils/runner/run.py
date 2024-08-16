@@ -7,16 +7,9 @@
 @作者        :Leo
 @版本        :1.0
 """
-import sys
 import subprocess
 import os
-
-base_path = os.path.dirname(
-    os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-)
-sys.path.append(base_path)
 from multiprocessing import Pool
-from ytest.common.control.shell import Shell
 from functools import partial
 from ytest.utils.case.case_file import get_file_path, find_file
 
@@ -41,16 +34,26 @@ def multi_process_run(project, floder=None, conf=None):
         pool.map(partial(run, conf=conf), case_list)
 
 
-def run(filename, conf):
+def run(filename, conf, run_type=None):
     # 获取当前脚本所在目录
     base_dir = os.path.dirname(os.path.abspath(__file__))
     # 构建相对路径
     script_path = os.path.join(base_dir, "..", "case", "test_default_case.py")
     # 规范路径
     script_path = os.path.abspath(script_path)
-
-    cmd = ["python", script_path, "--filename", filename, "--conf", conf]
-    # print(" ".join(cmd))
+    if not run_type:
+        cmd = ["python", script_path, "--filename", filename, "--conf", conf]
+    else:
+        cmd = [
+            "python",
+            script_path,
+            "--filename",
+            filename,
+            "--conf",
+            conf,
+            "--type",
+            "debug",
+        ]
     subprocess.run(cmd)
 
 

@@ -1,19 +1,28 @@
 from setuptools import setup, find_packages
 
+# 确保打包时包含包内的所有数据文件
+include_package_data = (True,)
+
 # 读取 README 文件
 with open("README.md", "r", encoding="utf-8") as fh:
     long_description = fh.read()
-
 setup(
     name="ytest",
     version="0.1.0",
     author="leo",
-    author_email="your.email@example.com",
     description="auto api test",
     url="https://github.com/leoyyer/ytest",
     long_description=long_description,
     long_description_content_type="text/markdown",
     packages=find_packages(),
+    package_data={
+        "ytest": [
+            "utils/initializer/demo_suite.xlsx",
+            "utils/initializer/demo_api.xlsx",
+            "utils/templates/json_schema.json",
+            "utils/templates/environment",
+        ],  # 指定需要打包的文件
+    },
     classifiers=[
         "Programming Language :: Python :: 3",
         "License :: OSI Approved :: MIT License",
@@ -58,6 +67,7 @@ setup(
         "xlwt==1.3.0",
         "zipp==3.15.0",
         "pandas==2.2.2",
+        "openpyxl==3.1.5",
     ],
     entry_points={
         "console_scripts": [

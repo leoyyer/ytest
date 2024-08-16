@@ -7,15 +7,15 @@
 @作者        :Leo
 @版本        :1.0
 """
-import os, sys
 import pytest
 import importlib
 
-
-base_path = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-sys.path.append(base_path)
-from common.allure.environment import add_environment, add_categories, add_history_trend
-from common.control.shell import Shell
+from ytest.common.allure.environment import (
+    add_environment,
+    add_categories,
+    add_history_trend,
+)
+from ytest.common.control.shell import Shell
 
 
 BLACK_LIST = {}
@@ -57,7 +57,7 @@ def pytest_collection_modifyitems(config, items):
 
     hook_result = {}
     # 获取 hook.default 模块中的所有函数并执行
-    module = importlib.import_module("case.public")
+    module = importlib.import_module("public")
     for name in dir(module):
         func = getattr(module, name)
         if callable(func):
@@ -90,25 +90,30 @@ def pytest_sessionfinish(session, exitstatus):
         * 添加用例的历史执行情况展示
     """
     # 获取命令行参数的值
-    args = session.config.invocation_params.args[5]
-    # 解析参数
-    _, report_dir = args.split("--alluredir=")
-    values = report_dir.split("/")
-    # 输出结果
-    project, conf, run_case_time = values[1], values[2], values[3]
-    # 添加环境配置展示
-    add_environment(project, f"report/{project}/{conf}/{run_case_time}")
-    # 添加用例异常分类展示
-    add_categories(f"report/{project}/{conf}/{run_case_time}")
-    # 生成 Allure 报告
-    cmd = "allure generate %s -o %s --clear %s" % (
-        f"report/{project}/{conf}/{run_case_time}/xml",
-        f"report/{project}/{conf}/{run_case_time}/html",
-        f"report/{project}/{conf}/{run_case_time}",
-    )
-    Shell.invoke(cmd)
-    # 添加用例的历史执行情况展示
-    add_history_trend(f"report/{project}/{conf}/", run_case_time)
+    # 使用生成器表达式来判断
+    alluredir_args = [
+        arg for arg in session.config.invocation_params.args if "--alluredir" in arg
+    ]
+    if len(alluredir_args) > 0:
+        args = alluredir_args[0]
+        # 解析参数
+        _, report_dir = args.split("--alluredir=")
+        values = report_dir.split("/")
+        # 输出结果
+        project, conf, run_case_time = values[1], values[2], values[3]
+        # 添加环境配置展示
+        add_environment(project, f"report/{project}/{conf}/{run_case_time}")
+        # 添加用例异常分类展示
+        add_categories(f"report/{project}/{conf}/{run_case_time}")
+        # 生成 Allure 报告
+        cmd = "allure generate %s -o %s --clear %s" % (
+            f"report/{project}/{conf}/{run_case_time}/xml",
+            f"report/{project}/{conf}/{run_case_time}/html",
+            f"report/{project}/{conf}/{run_case_time}",
+        )
+        Shell.invoke(cmd)
+        # 添加用例的历史执行情况展示
+        add_history_trend(f"report/{project}/{conf}/", run_case_time)
 
 
 @pytest.hookimpl(tryfirst=True, hookwrapper=True)

@@ -7,28 +7,21 @@
 @作者        :Leo
 @版本        :1.0
 """
-
-import sys
 import os
-
-base_path = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-log_path = os.path.dirname(
-    os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-)
-sys.path.append(log_path)
-sys.path.append(base_path)
 import json
 import xlrd
-from utils.logger.logger import MyLog
-from common.control import hook_variable
+from ytest.utils.logger.logger import MyLog
+from ytest.common.control import hook_variable
 import re
 import os
 import string
-from common.control import exc
+from ytest.common.control import exc
 from ytest.utils.case.conftest import BLACK_LIST, GLOBAL_VARIABLE
 from ytest.utils.case.case_file import find_file
-from common.control.replace_variable import resolve_vars, str_to_dict
+from ytest.common.control.replace_variable import resolve_vars, str_to_dict
 import jsonschema
+from ytest.utils.conf import config
+
 
 logger = MyLog(logger_name=__name__)
 
@@ -433,7 +426,7 @@ class ReadXlsData:
 
     def validate_case_data(self, case_data):
         """检验 case 是否符合模版"""
-        json_schema = find_file("ytest", "json_schema.json")
+        json_schema = find_file(config.ytest_path, "json_schema.json")
         with open(json_schema, "r") as f:
             json_schema = json.load(f)
         # 验证数据是否符合 JSON Schema
