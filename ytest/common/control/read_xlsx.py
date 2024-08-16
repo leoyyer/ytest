@@ -7,16 +7,7 @@
 @作者        :Leo
 @版本        :1.0
 """
-
-import sys
 import os
-
-base_path = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-log_path = os.path.dirname(
-    os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-)
-sys.path.append(log_path)
-sys.path.append(base_path)
 import json
 import xlrd
 from ytest.utils.logger.logger import MyLog

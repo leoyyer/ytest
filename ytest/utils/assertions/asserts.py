@@ -8,18 +8,12 @@
 @版本        :1.0
 """
 
-import sys
-import os
-
-base_path = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-sys.path.append(base_path)
 from ytest.utils.logger.logger import MyLog
 from ytest.utils.db import mysql
 import string
 from ytest.common.control import hook_variable
 import jsonpath
 import re
-import os
 from ytest.common.control.exc import CaseError, AssertError
 from ytest.common.control.replace_variable import resolve_vars
 

@@ -7,12 +7,7 @@
 @作者        :Leo
 @版本        :1.0
 """
-import sys
-import os
 import pymysql
-
-base_path = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-sys.path.append(base_path)
 from ytest.common.control.exc import SQLExecuteError
 from ytest.common.conf.conf import Config
 

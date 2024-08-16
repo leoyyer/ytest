@@ -7,15 +7,15 @@
 @作者        :Leo
 @版本        :1.0
 """
-import os, sys
 import pytest
 import importlib
 
-
-base_path = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-sys.path.append(base_path)
-from common.allure.environment import add_environment, add_categories, add_history_trend
-from common.control.shell import Shell
+from ytest.common.allure.environment import (
+    add_environment,
+    add_categories,
+    add_history_trend,
+)
+from ytest.common.control.shell import Shell
 
 
 BLACK_LIST = {}
@@ -90,7 +90,7 @@ def pytest_sessionfinish(session, exitstatus):
         * 添加用例的历史执行情况展示
     """
     # 获取命令行参数的值
-    args = session.config.invocation_params.args[5]
+    args = session.config.invocation_params.args[7]
     # 解析参数
     _, report_dir = args.split("--alluredir=")
     values = report_dir.split("/")

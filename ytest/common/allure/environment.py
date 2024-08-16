@@ -7,15 +7,12 @@
 @作者        :Leo
 @版本        :1.0
 """
-import sys
 import os
-
-base_path = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-sys.path.append(base_path)
 from jinja2 import Environment, FileSystemLoader
 from ytest.common.conf.conf import Config
 import json
 from datetime import datetime
+from ytest.utils.conf import config
 
 
 CATEGORIES = [
@@ -47,7 +44,8 @@ def add_environment(project, path):
         path ([type]): [description]
     """
     conf = Config(project=project)
-    env = Environment(loader=FileSystemLoader("ytest/utils/templates"))
+    template_path = os.path.join(config.ytest_path, "utils", "templates")
+    env = Environment(loader=FileSystemLoader(template_path))
     template = env.get_template("environment")
     base_url = conf.get_conf("project", "base_url")
     project_name = conf.get_conf("project", "project_name")
@@ -74,7 +72,7 @@ def add_categories(path):
         path (_type_): _description_
     """
     filename = "categories.json"
-    with open(path + "/" + filename, "w", encoding="utf-8") as fp:
+    with open(os.path.join(path, filename), "w", encoding="utf-8") as fp:
         json.dump(CATEGORIES, fp, ensure_ascii=False, indent=4)
 
 
