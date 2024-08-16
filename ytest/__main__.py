@@ -10,13 +10,10 @@
 import click
 import os
 import sys
-
-base_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-sys.path.append(base_path)
 from ytest.utils.runner.run import multi_process_run, run
 from ytest.utils.initializer.project_initializer import ProjectInitializer
 from ytest.utils.tools.case_bloat import CaseBloat
-from ytest.utils.case.case_file import find_folder
+from ytest.utils.conf import config
 
 
 __version__ = "1.0.0"
@@ -57,6 +54,39 @@ def main():
     """
 
 
+# 自定义功能：debug用例
+@main.command(name="debug", help="""debug测试用例 """)
+@click.option("-p", "--project", required=True, help="Project name to be executed")
+@click.option(
+    "-t",
+    "--type",
+    required=False,
+    type=click.Choice(["all", "api", "suite"]),
+    help="The type of use case that needs to execute the project",
+)
+@click.option("-f", "--filename", help="Specify a domain under the project", default="")
+@click.option(
+    "--env",
+    required=False,
+    help="The configuration read during execution, the default is: conf",
+    default="conf",
+)
+@click.option(
+    "-process",
+    "--process",
+    required=False,
+    type=click.Choice(["True"]),
+    help="pytest run by Process",
+)
+def run_command(project, type, filename, env, process):
+    if process == "True":
+        project = os.path.join("case", project)
+        multi_process_run(project=project, floder=type, conf=env)
+    else:
+        script_path = os.path.join(config.case_path, project, type, f"{filename}.xlsx")
+        run(script_path, env, run_type="debug")
+
+
 # 自定义功能：执行用例
 @main.command(name="run", help="""运行测试用例 """)
 @click.option("-p", "--project", required=True, help="Project name to be executed")
@@ -86,8 +116,7 @@ def run_command(project, type, filename, env, process):
         project = os.path.join("case", project)
         multi_process_run(project=project, floder=type, conf=env)
     else:
-        case_path = find_folder("case")
-        script_path = os.path.join(case_path, project, type, f"{filename}.xlsx")
+        script_path = os.path.join(config.case_path, project, type, f"{filename}.xlsx")
         run(script_path, env)
 
 

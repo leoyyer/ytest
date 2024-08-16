@@ -14,11 +14,6 @@ import importlib
 from ytest.common.control.exc import HookError, PathExtractionError
 
 
-BASE_WORKDIR = os.path.dirname(
-    os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-)
-
-
 def extract_path(url):
     """_summary_
     1. 通过匹配(api|suite)获取到用例所在项目的路径

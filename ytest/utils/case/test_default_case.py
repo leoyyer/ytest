@@ -1,11 +1,6 @@
 #!/usr/bin/env python
 # -*- encoding: utf-8 -*-
 
-import sys
-import os
-
-base_path = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-sys.path.append(base_path)
 import pytest
 import allure
 import argparse
@@ -143,13 +138,31 @@ class TestSuite(object):
 
 if __name__ == "__main__":
     # 运行测试用例
-    pytest.main(
-        [
-            "-s",
-            "-v",
-            "--cache-clear",  # 清除 pytest 缓存
-            "-o log_cli=true",
-            "-o log_cli_level=INFO",
-            f"--alluredir=report/{TestSuite.project}/{args.conf}/{TestSuite.run_case_time}/xml",  # 报告的路径
-        ]
-    )
+    if args.type == "debug":
+        pytest.main(
+            [
+                "-q",  # 减少输出信息，只显示关键信息
+                "-v",  # 启用详细模式,显示每个测试函数的完整路径和执行结果，便于了解具体哪个测试在运行
+                "--cache-clear",  # 清除 pytest 缓存
+                "--pyargs",
+                "ytest.utils.case.test_default_case",  # 注意这里的格式
+                "--disable-warnings",  # 禁用测试中的警告输出
+                "--tb=short",  # 控制错误输出的回溯信息格式,short 选项会显示简短的回溯信息，方便快速浏览错误原因。你也可以选择 long（详细）或 line（仅显示错误所在的行）
+                "-x",  # 遇到第一个失败后立即停止测试
+                # '--pdb'
+            ]
+        )
+    else:
+        pytest.main(
+            [
+                "-s",
+                "-v",
+                "--cache-clear",  # 清除 pytest 缓存
+                "-o log_cli=true",
+                "-o log_cli_level=INFO",
+                "--tb=short",
+                "--pyargs",
+                "ytest.utils.case.test_default_case",  # 注意这里的格式
+                f"--alluredir=report/{TestSuite.project}/{args.conf}/{TestSuite.run_case_time}/xml",  # 报告的路径
+            ]
+        )
