@@ -90,25 +90,30 @@ def pytest_sessionfinish(session, exitstatus):
         * 添加用例的历史执行情况展示
     """
     # 获取命令行参数的值
-    args = session.config.invocation_params.args[7]
-    # 解析参数
-    _, report_dir = args.split("--alluredir=")
-    values = report_dir.split("/")
-    # 输出结果
-    project, conf, run_case_time = values[1], values[2], values[3]
-    # 添加环境配置展示
-    add_environment(project, f"report/{project}/{conf}/{run_case_time}")
-    # 添加用例异常分类展示
-    add_categories(f"report/{project}/{conf}/{run_case_time}")
-    # 生成 Allure 报告
-    cmd = "allure generate %s -o %s --clear %s" % (
-        f"report/{project}/{conf}/{run_case_time}/xml",
-        f"report/{project}/{conf}/{run_case_time}/html",
-        f"report/{project}/{conf}/{run_case_time}",
+    # 使用生成器表达式来判断
+    contains_alluredir = any(
+        "--alluredir" in arg for arg in session.config.invocation_params.args
     )
-    Shell.invoke(cmd)
-    # 添加用例的历史执行情况展示
-    add_history_trend(f"report/{project}/{conf}/", run_case_time)
+    if contains_alluredir:
+        args = session.config.invocation_params.args[8]
+        # 解析参数
+        _, report_dir = args.split("--alluredir=")
+        values = report_dir.split("/")
+        # 输出结果
+        project, conf, run_case_time = values[1], values[2], values[3]
+        # 添加环境配置展示
+        add_environment(project, f"report/{project}/{conf}/{run_case_time}")
+        # 添加用例异常分类展示
+        add_categories(f"report/{project}/{conf}/{run_case_time}")
+        # 生成 Allure 报告
+        cmd = "allure generate %s -o %s --clear %s" % (
+            f"report/{project}/{conf}/{run_case_time}/xml",
+            f"report/{project}/{conf}/{run_case_time}/html",
+            f"report/{project}/{conf}/{run_case_time}",
+        )
+        Shell.invoke(cmd)
+        # 添加用例的历史执行情况展示
+        add_history_trend(f"report/{project}/{conf}/", run_case_time)
 
 
 @pytest.hookimpl(tryfirst=True, hookwrapper=True)

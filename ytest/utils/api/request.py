@@ -43,10 +43,11 @@ class RequestInterface(object):
             new_param = ""
         return new_param
 
-    def __validate_type(self, param, expected_type, param_name: str):
-        if param is not None and not isinstance(param, expected_type):
+    def __validate_type(self, param, expected_types, param_name: str):
+        if param is not None and not isinstance(param, tuple(expected_types)):
+            expected_types_names = ", ".join([t.__name__ for t in expected_types])
             raise TypeError(
-                f"参数 '{param_name}' 必须是 {expected_type.__name__} 类型, 但得到的是 {type(param).__name__}"
+                f"参数 '{param_name}' 必须是 {expected_types_names} 类型中的一个, 但得到的是 {type(param).__name__}"
             )
 
     def http_request(
@@ -73,13 +74,13 @@ class RequestInterface(object):
         interface_param = self.__new_param(interface_param)
 
         # 类型检查
-        self.__validate_type(interface_domain, str, "interface_domain")
-        self.__validate_type(interface_api, str, "interface_api")
-        self.__validate_type(interface_query, dict, "interface_query")
-        self.__validate_type(interface_param, dict, "interface_param")
-        self.__validate_type(request_type, str, "request_type")
-        self.__validate_type(headers, dict, "headers")
-        self.__validate_type(cookies, dict, "cookies")
+        self.__validate_type(interface_domain, [str], "interface_domain")
+        self.__validate_type(interface_api, [str], "interface_api")
+        self.__validate_type(interface_query, [dict, list], "interface_query")
+        self.__validate_type(interface_param, [dict, list], "interface_param")
+        self.__validate_type(request_type, [str], "request_type")
+        self.__validate_type(headers, [dict, None, ""], "headers")
+        self.__validate_type(cookies, [dict, None, ""], "cookies")
 
         get_url = self.api_data(interface_api, "请求地址", interface_domain)
         self.log.info("步骤结束 -> 参数化数据处理成功")
