@@ -12,6 +12,9 @@ import os
 import re
 import importlib
 from ytest.common.control.exc import HookError, PathExtractionError
+import sys
+from ytest.utils.conf import config
+from pathlib import Path
 
 
 def extract_path(url):
@@ -47,34 +50,54 @@ def extract_path(url):
         raise PathExtractionError("无法从URL中提取到有效的路径和文件夹部分")
 
 
-def get_hook_variable(list, funcName, **args):
+def get_hook_variable(hook_data, funcName, **args):
     """
-    1. 判断项目下是否存在hooks.py 文件,存在则装载到模块中
-    2. 判断用例中所传入的函数是否存在于hook中,存在则执行
+    1. 判断项目下是否存在 hooks.py 文件，存在则装载到模块中
+    2. 判断用例中所传入的函数是否存在于 hook 中，存在则执行
 
     Args:
-        list (_type_): {"hook_list": hook_list, "project": folder}
-        funcName (_type_): 函数名称
+        hook_data (dict): 包含 "hook_list" 和 "project" 的字典
+        funcName (str): 函数名称
 
     Raises:
-        HookError: _description_
+        HookError: 当函数不存在于模块中时抛出此异常
 
     Returns:
-        _type_: _description_
+        Any: 函数执行后的返回值
     """
-    hooks = list["hook_list"]
-    if len(hooks):
-        for i in hooks:
-            moduleSrc = f"case.{list['project']}." + i
-            # 动态导入模块
-            lib = importlib.import_module(moduleSrc)
-            # 判断函数是否存在模块中
+    hooks = hook_data.get("hook_list", [])
+    project = hook_data.get("project")
+
+    if not project:
+        raise HookError("未指定项目名称。")
+
+    # 使用 pathlib 处理路径，确保跨平台兼容性
+    case_path = Path(config.case_path).resolve()
+    case_parent_dir = case_path.parent
+
+    # 将 case 的父目录添加到 sys.path 中，以便 Python 能找到 'case' 包
+    case_parent_dir_str = str(case_parent_dir)
+    if case_parent_dir_str not in sys.path:
+        sys.path.append(case_parent_dir_str)
+
+    if hooks:
+        for hook in hooks:
+            # 构建模块路径，如 "case.project.hook"
+            moduleSrc = f"case.{project}.{hook}"
+            try:
+                # 动态导入模块
+                lib = importlib.import_module(moduleSrc)
+            except ModuleNotFoundError as e:
+                raise HookError(f"模块 {moduleSrc} 未找到，请检查。") from e
+
+            # 判断函数是否存在于模块中
             if hasattr(lib, funcName):
-                # 执行函数
                 function = getattr(lib, funcName)
                 return function(**args)
         else:
-            raise HookError(f"函数{funcName}不存在,请检查.")
+            raise HookError(f"函数 {funcName} 不存在，请检查。")
+    else:
+        raise HookError("hooks 列表为空，请检查传入参数。")
 
 
 def get_hook_name(path):
