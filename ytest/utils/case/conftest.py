@@ -9,6 +9,8 @@
 """
 import pytest
 import importlib
+import inspect
+import types
 
 from ytest.common.allure.environment import (
     add_environment,
@@ -47,24 +49,37 @@ def pytest_configure(config):
 
 def pytest_collection_modifyitems(config, items):
     """
-    pytest内置函数:在收集到测试用例后调用，可以修改或重排序测试用例。
-        目前主要用于对hook文件夹中的default.py中的函数调用,使其初始化
-    todo:
-        1. 遍历default.py中的func,执行func
-        2. 把func结果返回到hook_result
-        3. 往每个用例的global_variable中传入hook_result,达到部分参数需要在default.py中初始化的目的
-    """
+    遍历并执行指定模块中的所有函数。
 
+    Args:
+        module_name (str): 模块名，例如 "public"
+    """
+    try:
+        # 动态导入模块
+        module = importlib.import_module("public")
+    except ModuleNotFoundError:
+        print("模块 public 不存在.")
+        return
     hook_result = {}
-    # 获取 hook.default 模块中的所有函数并执行
-    module = importlib.import_module("public")
     for name in dir(module):
-        func = getattr(module, name)
-        if callable(func):
-            # 执行函数并捕获结果
-            result = func()
-            # 将结果添加到 hook_result 列表中
-            hook_result[f"public_{name}"] = result
+        obj = getattr(module, name)
+        # 确保对象是可调用的函数
+        if callable(obj) and isinstance(obj, types.FunctionType):
+            try:
+                # 获取函数的参数列表
+                params = inspect.signature(obj).parameters
+                # 检查是否有参数具有默认值
+                if any(
+                    param.default != inspect.Parameter.empty
+                    for param in params.values()
+                ):
+                    # 执行函数并捕获结果
+                    result = obj()
+                    # 将结果添加到 hook_result 列表中
+                    hook_result[f"public_{name}"] = result
+            except Exception as e:
+                print(f"执行函数 {name} 时发生错误: {e}")
+                continue
     for item in items:
         item.cls.global_variable.update(hook_result)
 
