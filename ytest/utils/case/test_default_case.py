@@ -150,7 +150,7 @@ if __name__ == "__main__":
                 "--disable-warnings",  # 禁用测试中的警告输出
                 "--tb=short",  # 控制错误输出的回溯信息格式,short 选项会显示简短的回溯信息，方便快速浏览错误原因。你也可以选择 long（详细）或 line（仅显示错误所在的行）
                 "-x",  # 遇到第一个失败后立即停止测试
-                # '--pdb'
+                f"--alluredir=report/{TestSuite.project}/{args.conf}/default/xml",  # 报告的路径
             ]
         )
     else:

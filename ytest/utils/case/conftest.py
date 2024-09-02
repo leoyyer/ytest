@@ -128,7 +128,8 @@ def pytest_sessionfinish(session, exitstatus):
         )
         Shell.invoke(cmd)
         # 添加用例的历史执行情况展示
-        add_history_trend(f"report/{project}/{conf}/", run_case_time)
+        if run_case_time != "default":
+            add_history_trend(f"report/{project}/{conf}/", run_case_time)
 
 
 @pytest.hookimpl(tryfirst=True, hookwrapper=True)
