@@ -13,6 +13,7 @@ from ytest.utils.api.request import RequestInterface
 from ytest.utils.assertions.asserts import Assertions
 from ytest.utils.extract.extracts import extract
 from ytest.utils.tools._time import _time
+import shutil
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--filename", type=str, help="配置所需执行的用例路径")
@@ -140,6 +141,7 @@ class TestSuite(object):
 if __name__ == "__main__":
     # 运行测试用例
     if args.type == "debug":
+        shutil.rmtree(f"report/{TestSuite.project}/{args.conf}/default")
         pytest.main(
             [
                 "-q",  # 减少输出信息，只显示关键信息
