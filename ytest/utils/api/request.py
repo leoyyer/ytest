@@ -44,6 +44,9 @@ class RequestInterface(object):
         return new_param
 
     def __validate_type(self, param, expected_types, param_name: str):
+        print("------------------")
+        print(f"{param_name}:")
+        print(f"{param}")
         if param is not None and not isinstance(param, tuple(expected_types)):
             expected_types_names = ", ".join([t.__name__ for t in expected_types])
             raise TypeError(
