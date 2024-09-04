@@ -7,7 +7,7 @@
 @作者        :Leo
 @版本        :1.0
 """
-import os, sys
+import os, sys, shutil
 
 
 def find_file(folder, file_name):
@@ -78,3 +78,12 @@ def find_folder(folder_name, start_path=None):
             sys.path.append(folder_path)
             return folder_path
     raise Exception(f"项目不存在{folder_name},请检查！")
+
+
+def default_folder(directory_path):
+    # 尝试删除目录
+    try:
+        shutil.rmtree(directory_path)
+    except FileNotFoundError:
+        # 如果目录不存在，则创建它
+        os.makedirs(directory_path)

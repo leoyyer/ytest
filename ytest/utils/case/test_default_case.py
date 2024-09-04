@@ -13,12 +13,13 @@ from ytest.utils.api.request import RequestInterface
 from ytest.utils.assertions.asserts import Assertions
 from ytest.utils.extract.extracts import extract
 from ytest.utils.tools._time import _time
-import shutil
+from ytest.utils.case.case_file import default_folder
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--filename", type=str, help="配置所需执行的用例路径")
 parser.add_argument("--conf", type=str, help="配置指定的执行文件", default="default")
 parser.add_argument("--type", type=str, help="执行策略", default="")
+parser.add_argument("--date", type=str, help="多线程执行时,指定的报告路径", default="")
 args = parser.parse_args()
 log = MyLog(logger_name=__name__)
 
@@ -141,7 +142,7 @@ class TestSuite(object):
 if __name__ == "__main__":
     # 运行测试用例
     if args.type == "debug":
-        shutil.rmtree(f"report/{TestSuite.project}/{args.conf}/default")
+        default_folder(f"report/{TestSuite.project}/{args.conf}/debug")
         pytest.main(
             [
                 "-q",  # 减少输出信息，只显示关键信息
@@ -152,7 +153,22 @@ if __name__ == "__main__":
                 "--disable-warnings",  # 禁用测试中的警告输出
                 "--tb=short",  # 控制错误输出的回溯信息格式,short 选项会显示简短的回溯信息，方便快速浏览错误原因。你也可以选择 long（详细）或 line（仅显示错误所在的行）
                 "-x",  # 遇到第一个失败后立即停止测试
-                f"--alluredir=report/{TestSuite.project}/{args.conf}/default/xml",  # 报告的路径
+                f"--alluredir=report/{TestSuite.project}/{args.conf}/debug/xml",  # 报告的路径
+            ]
+        )
+    elif args.date:
+        pytest.main(
+            [
+                "-q",  # 安静模式运行
+                "--cache-clear",  # 清除 pytest 缓存,确保测试环境干净。
+                "-o log_cli=true",
+                "-o log_cli_level=INFO",  # 在控制台中显示INFO级别的日志
+                "--tb=short",
+                "--disable-warnings",  # 禁用测试中的警告输出
+                "--maxfail=3",  # 在3个失败之后停止测试
+                "--pyargs",
+                "ytest.utils.case.test_default_case",  # 注意这里的格式
+                f"--alluredir=report/{TestSuite.project}/{args.conf}/{args.date}/xml",  # 报告的路径
             ]
         )
     else:
