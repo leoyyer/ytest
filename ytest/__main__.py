@@ -71,20 +71,9 @@ def main():
     help="The configuration read during execution, the default is: conf",
     default="conf",
 )
-@click.option(
-    "-process",
-    "--process",
-    required=False,
-    type=click.Choice(["True"]),
-    help="pytest run by Process",
-)
-def run_command(project, type, filename, env, process):
-    if process == "True":
-        project = os.path.join("case", project)
-        multi_process_run(project=project, floder=type, conf=env)
-    else:
-        script_path = os.path.join(config.case_path, project, type, f"{filename}.xlsx")
-        run(script_path, env, run_type="debug")
+def run_command(project, type, filename, env):
+    script_path = os.path.join(config.case_path, project, type, f"{filename}.xlsx")
+    run(script_path, env, run_type="debug")
 
 
 # 自定义功能：执行用例
