@@ -128,7 +128,7 @@ def pytest_sessionfinish(session, exitstatus):
         )
         Shell.invoke(cmd)
         # 添加用例的历史执行情况展示
-        if run_case_time != "default":
+        if run_case_time != "debug":
             add_history_trend(f"report/{project}/{conf}/", run_case_time)
 
 
