@@ -242,12 +242,13 @@ class Assertions:
                 if "len" in expected_data:
                     self.log.info(
                         "预期值: {0}, 实际返回值: {1}".format(
-                            expected_data["len"], len(res)
+                            expected_data["len"], len(res[0])
                         )
                     )
-                    assert len(res) == int(expected_data["len"])
+                    assert len(res[0]) == int(expected_data["len"])
                     self.log.info("assert_body 断言 -> 断言成功")
                     return True
+
                 elif "database" in expected_data:
                     _sql = resolve_vars(expected_data["sql"], self.global_variable)
                     db = mysql.MysqlDb(

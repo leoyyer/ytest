@@ -13,6 +13,7 @@ from multiprocessing import Pool
 from functools import partial
 from ytest.utils.case.case_file import get_file_path, find_file
 from ytest.utils.tools._time import _time
+from ytest.common.control.shell import Shell
 
 
 global_project = None  # 定义一个全局变量
@@ -34,6 +35,13 @@ def multi_process_run(project, floder=None, conf=None):
     POOL_SIZE = 3  # 设置最大并发进程数
     with Pool(POOL_SIZE) as pool:
         pool.map(partial(run, conf=conf, date=now_date), case_list)
+    # 多进程执行完成后,需要统一生成测试报告
+    project = project.split("/")[-1]
+    cmd = "allure generate %s -o %s " % (
+        f"report/{project}/{conf}/{now_date}/xml",
+        f"report/{project}/{conf}/{now_date}/html",
+    )
+    Shell.invoke(cmd)
 
 
 def run(filename, conf, run_type=None, date=None):

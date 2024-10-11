@@ -16,3 +16,12 @@ def _time():
     # 格式化为 20231001180501 的格式
     formatted_time = current_time.strftime("%Y%m%d%H%M%S")
     return str(formatted_time)
+
+
+def _dateTime():
+    # 获取当前时间
+    now = datetime.now()
+    # 输出结果
+    now_date_time = now.strftime("%Y%m%d")
+    # 例如：20241108
+    return now_date_time
