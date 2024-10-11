@@ -7,10 +7,7 @@
 @作者        :Leo
 @版本        :1.0
 """
-import pytest
-import importlib
-import inspect
-import types
+import types, re, importlib, inspect, pytest
 
 from ytest.common.allure.environment import (
     add_environment,
@@ -121,14 +118,14 @@ def pytest_sessionfinish(session, exitstatus):
         # 添加用例异常分类展示
         add_categories(f"report/{project}/{conf}/{run_case_time}")
         # 生成 Allure 报告
-        cmd = "allure generate %s -o %s --clear %s" % (
-            f"report/{project}/{conf}/{run_case_time}/xml",
-            f"report/{project}/{conf}/{run_case_time}/html",
-            f"report/{project}/{conf}/{run_case_time}",
-        )
-        Shell.invoke(cmd)
-        # 添加用例的历史执行情况展示
-        if run_case_time != "debug":
+        date_type = r"\d{14}"  # 匹配 YYYYMMDDHHMMSS
+        if re.match(date_type, run_case_time):
+            cmd = "allure generate %s -o %s " % (
+                f"report/{project}/{conf}/{run_case_time}/xml",
+                f"report/{project}/{conf}/{run_case_time}/html",
+            )
+            Shell.invoke(cmd)
+            # 添加用例的历史执行情况展示
             add_history_trend(f"report/{project}/{conf}/", run_case_time)
 
 
