@@ -68,6 +68,7 @@ setup(
         "zipp==3.15.0",
         "pandas==2.2.2",
         "openpyxl==3.1.5",
+        "pytest-rerunfailures==14.0",
     ],
     entry_points={
         "console_scripts": [
