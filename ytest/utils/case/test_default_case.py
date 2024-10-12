@@ -165,6 +165,8 @@ if __name__ == "__main__":
                 "-o log_cli_level=INFO",  # 在控制台中显示INFO级别的日志
                 "--tb=short",
                 "--disable-warnings",  # 禁用测试中的警告输出
+                "--reruns",
+                "3",  # 设置失败用例重试次数为3次
                 "--maxfail=3",  # 在3个失败之后停止测试
                 "--pyargs",
                 "ytest.utils.case.test_default_case",  # 注意这里的格式
