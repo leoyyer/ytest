@@ -12,7 +12,7 @@ import os
 from multiprocessing import Pool
 from functools import partial
 from ytest.utils.case.case_file import get_file_path, find_file
-from ytest.utils.tools._time import _time
+from ytest.utils.tools._time import _dateTime
 from ytest.common.control.shell import Shell
 
 
@@ -31,7 +31,7 @@ def multi_process_run(project, floder=None, conf=None):
         # 验证conf.ini文件是否存在
         find_file(project, f"{_conf}.ini")
     # 生成测试报告文件夹
-    now_date = _time()
+    now_date = _dateTime()
     POOL_SIZE = 3  # 设置最大并发进程数
     with Pool(POOL_SIZE) as pool:
         pool.map(partial(run, conf=conf, date=now_date), case_list)
