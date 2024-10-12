@@ -54,7 +54,7 @@ setup(
         "pydantic==1.10.7",
         "PyMySQL==1.0.2",
         "pyrsistent==0.19.3",
-        "pytest==6.2.5",
+        "pytest==7.2",
         "PyYAML==6.0",
         "requests==2.28.2",
         "six==1.16.0",
