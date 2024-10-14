@@ -14,9 +14,22 @@ from functools import partial
 from ytest.utils.case.case_file import get_file_path, find_file
 from ytest.utils.tools._time import _dateTime
 from ytest.common.control.shell import Shell
+import signal
 
 
-global_project = None  # 定义一个全局变量
+def stop_allure_service():
+    # 查找占用 8080 端口的进程，并终止它
+    try:
+        result = subprocess.run(["lsof", "-i", ":8080"], capture_output=True, text=True)
+        if result.stdout:
+            # 提取 PID 并终止进程
+            pid = int(result.stdout.splitlines()[1].split()[1])
+            os.kill(pid, signal.SIGTERM)
+            print(f"Terminated existing Allure service (PID: {pid})")
+        else:
+            print("No existing Allure service found on port 8080")
+    except Exception as e:
+        print(f"Failed to stop existing Allure service: {e}")
 
 
 def multi_process_run(project, floder=None, conf=None):
@@ -35,6 +48,10 @@ def multi_process_run(project, floder=None, conf=None):
     POOL_SIZE = 3  # 设置最大并发进程数
     with Pool(POOL_SIZE) as pool:
         pool.map(partial(run, conf=conf, date=now_date), case_list)
+
+    # 停止之前运行的 allure 服务
+    stop_allure_service()
+
     # 多进程执行完成后,需要统一生成测试报告
     project = project.split("/")[-1]
     cmd = "allure generate %s -o %s " % (
