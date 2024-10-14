@@ -54,7 +54,7 @@ setup(
         "pydantic==1.10.7",
         "PyMySQL==1.0.2",
         "pyrsistent==0.19.3",
-        "pytest==7.2",
+        "pytest==6.2.5",
         "PyYAML==6.0",
         "requests==2.28.2",
         "six==1.16.0",
@@ -68,7 +68,7 @@ setup(
         "zipp==3.15.0",
         "pandas==2.2.2",
         "openpyxl==3.1.5",
-        "pytest-rerunfailures==14.0",
+        "pytest-rerunfailures==9.1.1",
     ],
     entry_points={
         "console_scripts": [
