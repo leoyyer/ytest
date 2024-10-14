@@ -41,7 +41,9 @@ def multi_process_run(project, floder=None, conf=None):
         f"report/{project}/{conf}/{now_date}/xml",
         f"report/{project}/{conf}/{now_date}/html",
     )
+    oepn_report = f"allure open report/{project}/{conf}/{now_date}/html --port 8080"
     Shell.invoke(cmd)
+    Shell.invoke(oepn_report)
 
 
 def run(filename, conf, run_type=None, date=None):
