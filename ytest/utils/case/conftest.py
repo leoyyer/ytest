@@ -127,6 +127,13 @@ def pytest_sessionfinish(session, exitstatus):
             Shell.invoke(cmd)
             # 添加用例的历史执行情况展示
             add_history_trend(f"report/{project}/{conf}/", run_case_time)
+        if run_case_time == "debug":
+            cmd = "allure generate %s -o %s --clear %s" % (
+                f"report/{project}/{conf}/{run_case_time}/xml",
+                f"report/{project}/{conf}/{run_case_time}/html",
+                f"report/{project}/{conf}/{run_case_time}",
+            )
+            Shell.invoke(cmd)
 
 
 @pytest.hookimpl(tryfirst=True, hookwrapper=True)
