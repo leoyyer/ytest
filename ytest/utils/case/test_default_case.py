@@ -3,7 +3,7 @@
 
 import pytest
 import allure
-import argparse
+import argparse, os
 from ytest.common.conf.conf import Config
 from ytest.common.control.read_xlsx import ReadXlsData
 from ytest.utils.logger.logger import MyLog
@@ -20,6 +20,7 @@ parser.add_argument("--filename", type=str, help="配置所需执行的用例路
 parser.add_argument("--conf", type=str, help="配置指定的执行文件", default="default")
 parser.add_argument("--type", type=str, help="执行策略", default="")
 parser.add_argument("--date", type=str, help="多线程执行时,指定的报告路径", default="")
+parser.add_argument("--report_id", type=str, help="多线程执行时,报告id", default="")
 args = parser.parse_args()
 log = MyLog(logger_name=__name__)
 
@@ -105,7 +106,8 @@ class TestSuite(object):
             black_list,
         ) = case.values()
         # allure 报告内容展示
-        allure.dynamic.title(title)
+        _title = case["title"]
+        allure.dynamic.title(_title)
         allure.attach("{}".format(level), "用例等级")
         allure.attach("{}".format(model), "所属模块")
         # 对部分含变量的参数初始化
@@ -142,49 +144,68 @@ class TestSuite(object):
 if __name__ == "__main__":
     # 运行测试用例
     if args.type == "debug":
-        default_folder(f"report/{TestSuite.project}/{args.conf}/debug")
+        # 生成路径，兼容 Linux 和 Windows
+        debug_report_path = os.path.join(
+            "report", TestSuite.project, args.conf, "debug"
+        )
+        default_folder(debug_report_path)
+
         pytest.main(
             [
                 "-q",  # 减少输出信息，只显示关键信息
-                "-v",  # 启用详细模式,显示每个测试函数的完整路径和执行结果，便于了解具体哪个测试在运行
+                "-v",  # 启用详细模式
                 "--cache-clear",  # 清除 pytest 缓存
                 "--pyargs",
                 "ytest.utils.case.test_default_case",  # 注意这里的格式
                 "--disable-warnings",  # 禁用测试中的警告输出
-                "--tb=short",  # 控制错误输出的回溯信息格式,short 选项会显示简短的回溯信息，方便快速浏览错误原因。你也可以选择 long（详细）或 line（仅显示错误所在的行）
+                "--tb=short",  # 错误输出的回溯信息格式
                 "-x",  # 遇到第一个失败后立即停止测试
-                f"--alluredir=report/{TestSuite.project}/{args.conf}/debug/xml",  # 报告的路径
+                f"--alluredir={os.path.join(debug_report_path, 'xml')}",  # 报告的路径
             ]
         )
     elif args.date:
+        # 生成路径，兼容 Linux 和 Windows
+        date_report_path = os.path.join(
+            "report", TestSuite.project, args.conf, args.date, args.report_id, "xml"
+        )
+
         pytest.main(
             [
                 "-q",  # 安静模式运行
-                "--cache-clear",  # 清除 pytest 缓存,确保测试环境干净。
-                "-o log_cli=true",
-                "-o log_cli_level=INFO",  # 在控制台中显示INFO级别的日志
+                "--cache-clear",  # 清除 pytest 缓存, 确保测试环境干净
+                "-o",
+                "log_cli=true",
+                "-o",
+                "log_cli_level=INFO",  # 控制台中显示INFO级别的日志
                 "--tb=short",
                 "--disable-warnings",  # 禁用测试中的警告输出
                 "--reruns",
-                "3",  # 设置失败用例重试次数为3次
-                "--maxfail=3",  # 在3个失败之后停止测试
+                "3",  # 失败用例重试次数为3次
+                "--maxfail=3",  # 3个失败之后停止测试
                 "--pyargs",
                 "ytest.utils.case.test_default_case",  # 注意这里的格式
-                f"--alluredir=report/{TestSuite.project}/{args.conf}/{args.date}/xml",  # 报告的路径
+                f"--alluredir={date_report_path}",  # 报告的路径
             ]
         )
     else:
+        # 生成路径，兼容 Linux 和 Windows
+        default_report_path = os.path.join(
+            "report", TestSuite.project, args.conf, TestSuite.run_case_time, "xml"
+        )
+
         pytest.main(
             [
                 "-q",  # 安静模式运行
-                "--cache-clear",  # 清除 pytest 缓存,确保测试环境干净。
-                "-o log_cli=true",
-                "-o log_cli_level=INFO",  # 在控制台中显示INFO级别的日志
+                "--cache-clear",  # 清除 pytest 缓存, 确保测试环境干净
+                "-o",
+                "log_cli=true",
+                "-o",
+                "log_cli_level=INFO",  # 控制台中显示INFO级别的日志
                 "--tb=short",
                 "--disable-warnings",  # 禁用测试中的警告输出
-                "--maxfail=3",  # 在3个失败之后停止测试
+                "--maxfail=3",  # 3个失败之后停止测试
                 "--pyargs",
                 "ytest.utils.case.test_default_case",  # 注意这里的格式
-                f"--alluredir=report/{TestSuite.project}/{args.conf}/{TestSuite.run_case_time}/xml",  # 报告的路径
+                f"--alluredir={default_report_path}",  # 报告的路径
             ]
         )

@@ -69,6 +69,7 @@ setup(
         "pandas==2.2.2",
         "openpyxl==3.1.5",
         "pytest-rerunfailures==9.1.1",
+        "icecream==2.1.3",
     ],
     entry_points={
         "console_scripts": [

@@ -10,7 +10,6 @@
 
 from configparser import ConfigParser
 import os
-
 from ytest.utils.conf import config
 
 
@@ -71,4 +70,3 @@ class Config:
 if __name__ == "__main__":
     Ctest = Config("demo")
     test = Ctest.get_conf("mysql", "mysql_passwd")
-    print(test)

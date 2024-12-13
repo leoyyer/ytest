@@ -7,63 +7,70 @@
 @作者        :Leo
 @版本        :1.0
 """
-import subprocess
-import os
+from icecream import ic
+import os, time, subprocess
 from multiprocessing import Pool
 from functools import partial
 from ytest.utils.case.case_file import get_file_path, find_file
 from ytest.utils.tools._time import _dateTime
 from ytest.common.control.shell import Shell
-import signal
+from ytest.common.conf.conf import Config
+from ytest.utils.message.wechat import qywx
+from ytest.utils.db.sqllife import YtestDatabase
+
+db = YtestDatabase()
+from ytest.common.allure.environment import add_environment, add_categories
 
 
-def stop_allure_service():
-    # 查找占用 8080 端口的进程，并终止它
-    try:
-        result = subprocess.run(["lsof", "-i", ":8080"], capture_output=True, text=True)
-        if result.stdout:
-            # 提取 PID 并终止进程
-            pid = int(result.stdout.splitlines()[1].split()[1])
-            os.kill(pid, signal.SIGTERM)
-            print(f"Terminated existing Allure service (PID: {pid})")
-        else:
-            print("No existing Allure service found on port 8080")
-    except Exception as e:
-        print(f"Failed to stop existing Allure service: {e}")
-
-
-def multi_process_run(project, floder=None, conf=None):
+def multi_process_run(project, ytest_folder=None, conf=None):
     """
     0. 判断项目和所需运行的文件夹,以及配置文件是否存在
     1. 遍历用例,过滤掉名字以_stop和._的开头的用例
     2. 组装参数,废弃原来的用例是否生成判断,默认生成
     """
-    case_list = get_file_path(project, floder)
+    # 使用 os.path.normpath 规范化路径
+    project_path = os.path.normpath(project)
+    case_list = get_file_path(project_path, ytest_folder)
     if conf:
         _conf = conf if conf is not None else "conf"
-        # 验证conf.ini文件是否存在
-        find_file(project, f"{_conf}.ini")
+        # 验证 conf.ini 文件是否存在
+        find_file(project_path, f"{_conf}.ini")
+
+    # 获取项目名称，兼容 Windows 和 Linux
+    project_name = os.path.basename(project_path)
+    now_case_conf = Config(project_name, _conf)
     # 生成测试报告文件夹
     now_date = _dateTime()
+    name = f"{project_name}_{str(int(time.time()))}"
+    # 假设 db.insert_report() 生成了报告ID
+    report_id = str(
+        db.insert_report(
+            name, project_name, conf, now_date, passed=0, failed=0, skipped=0, error=0
+        )
+    )
     POOL_SIZE = 3  # 设置最大并发进程数
     with Pool(POOL_SIZE) as pool:
-        pool.map(partial(run, conf=conf, date=now_date), case_list)
+        pool.map(partial(run, conf=conf, date=now_date, report_id=report_id), case_list)
 
-    # 停止之前运行的 allure 服务
-    stop_allure_service()
-
-    # 多进程执行完成后,需要统一生成测试报告
-    project = project.split("/")[-1]
-    cmd = "allure generate %s -o %s " % (
-        f"report/{project}/{conf}/{now_date}/xml",
-        f"report/{project}/{conf}/{now_date}/html",
-    )
-    oepn_report = f"allure open report/{project}/{conf}/{now_date}/html --port 8080"
+    # 拼接 Allure 报告生成路径，兼容 Linux 和 Windows
+    xml_path = os.path.join("report", project_name, conf, now_date, report_id, "xml")
+    html_path = os.path.join("report", project_name, conf, now_date, report_id, "html")
+    env_path = os.path.join("report", project_name, conf, now_date, report_id)
+    add_environment(project_name, env_path)
+    add_categories(env_path)
+    # 生成 Allure 报告的 Shell 命令
+    cmd = f"allure generate {xml_path} -o {html_path}"
     Shell.invoke(cmd)
-    Shell.invoke(oepn_report)
+    failed = db.fetch_api_detail(report_id)
+    if int(failed) > 0:
+        db.update_report(report_id, failed)
+        if int(
+            now_case_conf.get_conf("qywx", "Enable")
+        ) == 1 and now_case_conf.get_conf("qywx", "webhook_url"):
+            qywx(now_case_conf.get_conf("qywx", "webhook_url"), failed, _conf)
 
 
-def run(filename, conf, run_type=None, date=None):
+def run(filename, conf, run_type=None, date=None, report_id=None):
     # 获取当前脚本所在目录
     base_dir = os.path.dirname(os.path.abspath(__file__))
     # 构建相对路径
@@ -82,6 +89,8 @@ def run(filename, conf, run_type=None, date=None):
             conf,
             "--date",
             date,
+            "--report_id",
+            report_id,
         ]
 
     else:
@@ -100,4 +109,6 @@ def run(filename, conf, run_type=None, date=None):
 
 if __name__ == "__main__":
     project = os.path.join("case", "demo")
-    multi_process_run(project, floder="suite", conf="test")
+    multi_process_run(project, ytest_folder="suite", conf="test")
+    # conf = Config('fast', "test")
+    # ic(conf.get_conf("qywx", "webhook_url"))

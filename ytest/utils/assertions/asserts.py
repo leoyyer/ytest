@@ -33,9 +33,7 @@ class Assertions:
                     # 存在${value}时,则替换变量的值
                     i = resolve_vars(item, self.global_variable)
                     if i["type"] == "response_body":
-                        self.log.info(
-                            "进入断言 -> (response_body)验证response body中任意属性的值"
-                        )
+                        self.log.info(f"进入断言[response_body]: " + str(i["text"]))
                         assert self.assert_body(data, i["text"])
                         continue
                     elif i["type"] == "response_code":
@@ -57,6 +55,9 @@ class Assertions:
                         continue
                     elif i["type"] == "length_equals":
                         assert self.length_equals(data, i)
+                        continue
+                    elif i["type"] == "length_equals_greater":
+                        assert self.length_equals_greater(data, i)
                         continue
                     elif i["type"] == "time":
                         self.log.info(
@@ -291,6 +292,86 @@ class Assertions:
                     else:
                         value = hook_variable.get_hook_variable(hook_list, func_list[0])
                     assert int(len(res)) == int(value)
+                    self.log.info(
+                        "预期值: {0}, 函数实际返回值: {1}".format(len(res), value)
+                    )
+                    return True
+            else:
+                self.log.error("断言失败,提取的内容并非列表,无法进行断言")
+                return False
+        else:
+            self.log.error("断言数据解析失败,格式错误,length_equals:text只支持一个参数")
+            raise AssertError(
+                "断言数据解析失败,格式错误,length_equals:text只支持一个参数"
+            )
+
+    def length_equals_greater(self, body, expected_data):
+        """
+        断言:大于
+        expected_data 格式:
+        1. 支持 body提取,比对: {"type":"length_equals_greater","text":"res=body.items","len":1 }
+        2. 支持 mysql查询,比对: {"type":"length_equals_greater","text":"res=body.items", "database":"starship_test_ops","sql":"select count(*) from xxxxx where xxxxx"}
+        3. 支持 函数返回值与body,比对: {"type":"length_equals_greater","text":"res=body.items", "func":"${create_app_code()}"}
+        """
+        _expect = {
+            i.split("=")[0]: i.split("=")[1] for i in expected_data["text"].split(";")
+        }
+        if len(_expect) == 1:
+            value = next(iter(_expect.values()))
+            res = jsonpath.jsonpath(body, f"$.{value}")
+            if isinstance(res, list):
+                if "len" in expected_data:
+                    self.log.info(
+                        "预期值: {0}, 实际返回值: {1}".format(
+                            expected_data["len"], len(res[0])
+                        )
+                    )
+                    assert len(res[0]) > int(expected_data["len"])
+                    self.log.info("assert_body 断言 -> 断言成功")
+                    return True
+
+                elif "database" in expected_data:
+                    _sql = resolve_vars(expected_data["sql"], self.global_variable)
+                    db = mysql.MysqlDb(
+                        database=expected_data["database"],
+                        project=self.project,
+                        env=self.env,
+                    )
+                    result = db.select_db(_sql) if db.select_db(_sql) else "None"
+                    self.log.info(f"执行sql, 返回结果: {result}")
+                    if len(result) > 0:
+                        sql_len = int(result[0][list(result[0].keys())[0]])
+                        self.log.info(
+                            "预期值: {0}, sql实际返回值: {1}".format(len(res), sql_len)
+                        )
+                        assert int(len(res)) > int(sql_len)
+                        return True
+                    else:
+                        self.log.info(
+                            "预期值: {0}, sql实际返回值: {1}".format(len(res), 0)
+                        )
+                        assert int(len(res)) == 0
+                        return True
+                elif "func" in expected_data:
+                    func_list = re.findall(
+                        r"(?<=\$\{)(.*)(?=\()", expected_data["func"]
+                    )
+                    _func_arg = expected_data["func"].split("(")[1].split(")")[0]
+                    func_arg = string.Template(_func_arg).substitute(
+                        self.global_variable
+                    )
+                    hook_list = hook_variable.get_hook_name()
+                    if func_arg:
+                        kwargs = dict(
+                            l.replace(" ", "").split("=", 1)
+                            for l in func_arg.split(",")
+                        )
+                        value = hook_variable.get_hook_variable(
+                            hook_list, func_list[0], **kwargs
+                        )
+                    else:
+                        value = hook_variable.get_hook_variable(hook_list, func_list[0])
+                    assert int(len(res)) > int(value)
                     self.log.info(
                         "预期值: {0}, 函数实际返回值: {1}".format(len(res), value)
                     )
