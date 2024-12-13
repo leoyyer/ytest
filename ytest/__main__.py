@@ -7,14 +7,14 @@
 @作者        :Leo
 @版本        :1.0
 """
-import click
-import os
-import sys
+import click, os, sys
 from ytest.utils.runner.run import multi_process_run, run
 from ytest.utils.initializer.project_initializer import ProjectInitializer
 from ytest.utils.tools.case_bloat import CaseBloat
 from ytest.utils.conf import config
+from ytest.utils.db.sqllife import YtestDatabase
 
+db = YtestDatabase()
 
 __version__ = "1.0.0"
 
@@ -103,7 +103,7 @@ def run_command(project, type, filename, env):
 def run_command(project, type, filename, env, process):
     if process == "True":
         project = os.path.join("case", project)
-        multi_process_run(project=project, floder=type, conf=env)
+        multi_process_run(project=project, ytest_folder=type, conf=env)
     else:
         script_path = os.path.join(config.case_path, project, type, f"{filename}.xlsx")
         run(script_path, env)
@@ -115,6 +115,7 @@ def run_command(project, type, filename, env, process):
 def run_command(project):
     project_initializer = ProjectInitializer(project)
     project_initializer.initialize_project()
+    db._create_tables()
 
 
 # 用例膨胀

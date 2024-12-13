@@ -34,6 +34,10 @@ mysql_host = xxxxx
 mysql_port = 3306
 mysql_user = root
 mysql_passwd = xxxxx
+
+[qywx]
+Enable = 0
+webhook_url =
 """
         self.hook_file = os.path.join(self.project_dir, "hook.py")
         self.hook_content = '''#!/usr/bin/env python

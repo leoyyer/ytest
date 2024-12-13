@@ -7,7 +7,16 @@
 @作者        :Leo
 @版本        :1.0
 """
-import types, re, importlib, inspect, pytest
+import pytest
+import importlib
+import inspect
+import types
+import os, re
+import allure
+from collections import defaultdict
+from ytest.utils.db.sqllife import YtestDatabase
+
+db = YtestDatabase()
 
 from ytest.common.allure.environment import (
     add_environment,
@@ -16,6 +25,8 @@ from ytest.common.allure.environment import (
 )
 from ytest.common.control.shell import Shell
 
+# 记录模块及其下的测试用例
+module_results = defaultdict(lambda: {"passed": [], "failed": [], "skipped": []})
 
 BLACK_LIST = {}
 GLOBAL_VARIABLE = {}
@@ -37,6 +48,42 @@ def global_black_list():
     return BLACK_LIST
 
 
+def pytest_sessionfinish(session, exitstatus):
+    """
+    pytest内置函数:在测试会话结束时调用
+    1. 获取pytest的执行命令,提取出对应的项目,配置,运行用例时间
+    2. 对报告做修改主要有:
+        * 添加环境配置展示
+        * 添加用例异常分类展示
+        * 生成 Allure 报告
+        * 添加用例的历史执行情况展示
+    """
+    # 获取命令行参数的值
+    alluredir_args = [
+        arg for arg in session.config.invocation_params.args if "--alluredir" in arg
+    ]
+    if len(alluredir_args) > 0:
+        args = alluredir_args[0]
+        # 解析参数
+        _, report_dir = args.split("--alluredir=")
+        # 规范化路径，分割路径成不同部分，兼容 Windows 和 Linux
+        normalized_path = os.path.normpath(report_dir)
+        values = normalized_path.split(os.sep)
+        # 提取项目名、配置名、运行时间和报告ID
+        project, conf, run_case_time, report_id = (
+            values[1],
+            values[2],
+            values[3],
+            values[4] if len(values) > 4 else None,
+        )
+        if run_case_time in ["debug"]:
+            xml_path = os.path.join("report", project, conf, run_case_time, "xml")
+            html_path = os.path.join("report", project, conf, run_case_time, "html")
+            clear_path = os.path.join("report", project, conf, run_case_time)
+            cmd = f"allure generate {xml_path} -o {html_path} --clear {clear_path}"
+            Shell.invoke(cmd)
+
+
 def pytest_configure(config):
     """
     在pytest 运行前被调用一次，主要用于在测试运行之前进行配置和初始化工作。
@@ -46,8 +93,8 @@ def pytest_configure(config):
 
 def pytest_collection_modifyitems(config, items):
     """
-    遍历并执行指定模块中的所有函数。
-
+    1.遍历并执行指定模块中的所有函数,加入到全局变量中
+    2.自定义 pytest 终端报告格式,不展示参数化的数据
     Args:
         module_name (str): 模块名，例如 "public"
     """
@@ -79,61 +126,26 @@ def pytest_collection_modifyitems(config, items):
                 continue
     for item in items:
         item.cls.global_variable.update(hook_result)
+    for item in items:
+        if hasattr(item, "callspec"):
+            # 提取参数中的 `title`
+            case = item.callspec.params.get("case")
+            if case:
+                title = case.get("title", "No Title")
+                # 将 `_nodeid` 设为 `title`，用于显示
+                item._nodeid = title
 
 
+@pytest.hookimpl(hookwrapper=True)
 def pytest_runtest_setup(item):
     """
     pytest内置函数:在执行测试用例的 setup 部分之前调用,暂时空置,没做任何功能,预留入口
     """
+    yield
     request_object = item._request
     setup_data = request_object.node.get_closest_marker("parametrize").args[1][
         request_object.node.callspec.indices["case"]
     ]["setup"]
-
-
-def pytest_sessionfinish(session, exitstatus):
-    """
-    pytest内置函数:在测试会话结束时调用
-    1. 获取pytest的执行命令,提取出对应的项目,配置,运行用例时间
-    2. 对报告做修改主要有:
-        * 添加环境配置展示
-        * 添加用例异常分类展示
-        * 生成 Allure 报告
-        * 添加用例的历史执行情况展示
-    """
-    # 获取命令行参数的值
-    # 使用生成器表达式来判断
-    alluredir_args = [
-        arg for arg in session.config.invocation_params.args if "--alluredir" in arg
-    ]
-    if len(alluredir_args) > 0:
-        args = alluredir_args[0]
-        # 解析参数
-        _, report_dir = args.split("--alluredir=")
-        values = report_dir.split("/")
-        # 输出结果
-        project, conf, run_case_time = values[1], values[2], values[3]
-        # 添加环境配置展示
-        add_environment(project, f"report/{project}/{conf}/{run_case_time}")
-        # 添加用例异常分类展示
-        add_categories(f"report/{project}/{conf}/{run_case_time}")
-        # 生成 Allure 报告
-        date_type = r"\d{14}"  # 匹配 YYYYMMDDHHMMSS
-        if re.match(date_type, run_case_time):
-            cmd = "allure generate %s -o %s " % (
-                f"report/{project}/{conf}/{run_case_time}/xml",
-                f"report/{project}/{conf}/{run_case_time}/html",
-            )
-            Shell.invoke(cmd)
-            # 添加用例的历史执行情况展示
-            add_history_trend(f"report/{project}/{conf}/", run_case_time)
-        if run_case_time == "debug":
-            cmd = "allure generate %s -o %s --clear %s" % (
-                f"report/{project}/{conf}/{run_case_time}/xml",
-                f"report/{project}/{conf}/{run_case_time}/html",
-                f"report/{project}/{conf}/{run_case_time}",
-            )
-            Shell.invoke(cmd)
 
 
 @pytest.hookimpl(tryfirst=True, hookwrapper=True)
@@ -145,9 +157,50 @@ def pytest_runtest_makereport(item, call):
     report = outcome.get_result()
 
     if report.when == "call":
-        # 检查测试项是否有参数
-        if "case" in item.fixturenames:
-            # 从报告中删除参数部分
-            report.sections = [
-                section for section in report.sections if "Parameters" not in section
-            ]
+        # 动态设置 Allure 的标题
+        case = item.callspec.params.get("case") if hasattr(item, "callspec") else None
+        if case and "title" in case:
+            allure.dynamic.title(case["title"])
+        # 移除 Allure 报告中的参数
+        report.user_properties = []
+    if report.when == "call":
+        # 如果存在 Allure 报告的参数，则清空它
+        if hasattr(report, "user_properties"):
+            report.user_properties = []
+
+
+def pytest_runtest_logreport(report):
+    """捕获测试结果并归类到对应模块"""
+    if report.when == "call":  # 只关心测试函数的执行结果
+        module_name = report.nodeid.split("::")[0]  # 提取模块名称
+        if report.outcome == "passed":
+            module_results[module_name]["passed"].append(report.nodeid)
+        elif report.outcome == "failed":
+            module_results[module_name]["failed"].append(report.nodeid)
+        elif report.outcome == "skipped":
+            module_results[module_name]["skipped"].append(report.nodeid)
+
+
+def pytest_terminal_summary(config):
+    """在测试结束时按模块输出统计信息"""
+    # 获取 pytest 命令行参数
+    option = config.option  # 通过 config 访问命令行的所有参数
+    allure_report_dir = option.allure_report_dir  # 提取 allure_report_dir
+    # print(option.__dict__)
+    # print(f"\nAllure 报告目录: {allure_report_dir}")  # 单独输出 Allure 报告目录
+    # 规范路径，兼容 Linux 和 Windows
+    normalized_path = os.path.normpath(allure_report_dir)
+    # 分割路径并提取最后一个含有数字的部分
+    run_type = normalized_path.split(os.sep)[-2]
+    if run_type not in ["debug"]:
+        parts = normalized_path.split(os.sep)
+        # 匹配最后一个由纯数字组成的部分
+        report_id = next((part for part in reversed(parts) if part.isdigit()), None)
+        for module, results in module_results.items():
+            db.insert_api_detail(
+                report_id,
+                module,
+                len(results["passed"]),
+                len(results["failed"]),
+                len(results["skipped"]),
+            )
