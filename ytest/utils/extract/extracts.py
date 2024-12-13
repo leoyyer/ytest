@@ -26,3 +26,4 @@ def extract(response, extract_param, global_variable):
             value = next(iter(_extract.values()))
             res = jsonpath.jsonpath(response, f"$.{value}")
             global_variable.update({next(iter(_extract.keys())): res[0]})
+    log.info(f"[全局变量列表更新] >>> \n{global_variable}")

@@ -25,6 +25,7 @@ def find_file(folder, file_name):
     for root, dirs, files in os.walk(folder):
         if file_name in files:
             return os.path.join(root, file_name)
+    print(root, dirs, files)
     raise FileNotFoundError(f"{folder}目录下,文件{file_name}不存在,请检查")
 
 
