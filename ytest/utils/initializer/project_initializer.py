@@ -92,6 +92,37 @@ def generated_uuid(user):
 if __name__ == '__main__':
     generate_now_time()
 '''
+        self.public_file = os.path.join(self.case_dir, "public.py")
+        self.public_content = """
+#!/usr/bin/env python
+# -*- encoding: utf-8 -*-
+'''
+@文件        :public.py
+@说明        :cace层级的通用hook函数
+@时间        :2024/08/30 17:33:26
+@作者        :Leo
+@版本        :1.0
+'''
+from datetime import datetime, timedelta
+from icecream import ic
+
+def generated_detetime(days=None,date_type="st"):
+    if days:
+        # 获取明天的时间
+        _time = datetime.now() + timedelta(days=int(days))
+    else:
+        _time = datetime.now()
+     # 转换成指定的格式
+    if date_type == 'st':
+        specific_formatted_time = _time.strftime('%Y-%m-%d 00:00:00')
+    else:
+        specific_formatted_time = _time.strftime('%Y-%m-%d 23:59:59')
+    return specific_formatted_time
+
+
+if __name__ == '__main__':
+    ic(generated_detetime())
+        """
         self.demo_api_file = os.path.join(base_dir, "initializer", "demo_api.xlsx")
         self.demo_suite_file = os.path.join(base_dir, "initializer", "demo_suite.xlsx")
 
@@ -130,15 +161,14 @@ if __name__ == '__main__':
         self.create_dir(self.project_dir)
         self.create_dir(self.api_dir)
         self.create_dir(self.suite_dir)
-
         # 创建 ini 文件
         for ini_file in self.ini_files:
             file_path = os.path.join(self.project_dir, ini_file)
             self.create_file(file_path, self.ini_content)
-
         # 创建 hook.py 文件
         self.create_file(self.hook_file, self.hook_content)
-
+        # 创建 public.py 文件
+        self.create_file(self.public_content, self.public_file)
         # 拷贝 demo.xlsx 文件
         self.copy_demo_file()
         print(f"项目{self.project_name}初始化成功!")
