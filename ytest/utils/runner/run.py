@@ -13,7 +13,7 @@ from multiprocessing import Pool
 from functools import partial
 from ytest.utils.case.case_file import get_file_path, find_file
 from ytest.utils.tools._time import _dateTime
-from ytest.common.control.shell import Shell
+from ytest.common.control.shell import Shell, check_port_with_lsof
 from ytest.common.conf.conf import Config
 from ytest.utils.message.wechat import qywx
 from ytest.utils.db.sqllife import YtestDatabase
@@ -68,9 +68,12 @@ def multi_process_run(project, ytest_folder=None, conf=None):
             now_case_conf.get_conf("qywx", "Enable")
         ) == 1 and now_case_conf.get_conf("qywx", "webhook_url"):
             qywx(now_case_conf.get_conf("qywx", "webhook_url"), failed, _conf)
-    open_allure = (
-        f"lsof -ti :8080 | xargs kill -9 && allure open {html_path} --port 8080"
-    )
+    if check_port_with_lsof:
+        open_allure = (
+            f"lsof -ti :8080 | xargs kill -9 && allure open {html_path} --port 8080"
+        )
+    else:
+        open_allure = f"allure open {html_path} --port 8080"
     Shell.invoke(open_allure)
 
 

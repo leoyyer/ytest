@@ -19,3 +19,9 @@ class Shell:
         ).communicate()
         o = output.decode("utf-8")
         return o
+
+def check_port_with_lsof(port):
+    result = subprocess.run(f"lsof -i :{port}", shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    if result.stdout:
+        return True  # 端口已被占用
+    return False  # 端口未被占用
