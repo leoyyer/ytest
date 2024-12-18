@@ -68,6 +68,10 @@ def multi_process_run(project, ytest_folder=None, conf=None):
             now_case_conf.get_conf("qywx", "Enable")
         ) == 1 and now_case_conf.get_conf("qywx", "webhook_url"):
             qywx(now_case_conf.get_conf("qywx", "webhook_url"), failed, _conf)
+    open_allure = (
+        f"lsof -ti :8080 | xargs kill -9 && allure open {html_path} --port 8080"
+    )
+    Shell.invoke(open_allure)
 
 
 def run(filename, conf, run_type=None, date=None, report_id=None):

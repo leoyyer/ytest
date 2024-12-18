@@ -1,7 +1,9 @@
 FROM python:3.9-alpine
+ENV http_proxy=https://hub-mirror.c.163.com:443
+
 
 # 安装系统依赖，包括 Java (openjdk11)，并在使用 unzip 时安装它
-RUN apk add --no-cache tzdata git wget openjdk11-jre lsof && \
+RUN apk add --no-cache tzdata git wget openjdk11-jre lsof dcron&& \
     apk add --no-cache --virtual .build-deps unzip build-base && \
     python3 -m pip install --upgrade pip setuptools wheel && \
     wget https://github.com/allure-framework/allure2/releases/download/2.19.0/allure-2.19.0.zip && \
