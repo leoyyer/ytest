@@ -14,13 +14,13 @@ from ytest.templates.hook_temp import hook_content
 from ytest.templates.public_temp import public_content
 from ytest.templates.ini_temp import ini_content
 
-base_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 
 class ProjectInitializer:
     def __init__(self, project_name):
         self.project_name = project_name
-        self.base_path = base_dir
+        self.base_path = os.path.abspath(os.getcwd())
         self.ini_content = ini_content
         self.hook_content = hook_content
         self.public_content = public_content
