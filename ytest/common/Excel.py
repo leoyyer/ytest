@@ -13,7 +13,7 @@ from ytest.common.HookVariable import hook_variable
 from ytest.common.File import file_operate
 from ytest.conf import config
 
-from ytest.base.conftest import BLACK_LIST, GLOBAL_VARIABLE
+from ytest.case.conftest import BLACK_LIST, GLOBAL_VARIABLE
 
 
 class ReadXlsData:

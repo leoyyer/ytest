@@ -15,7 +15,7 @@ from ytest.common.File import Flile
 class Config:
     ytest_file = Flile()
     # 获取case文件夹路径
-    case_path = ytest_file.find_folder("base")
+    case_path = ytest_file.find_folder("case")
     # 获取ytest项目路径
     ytest_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     sys.path.append(case_path)
