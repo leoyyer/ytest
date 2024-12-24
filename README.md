@@ -47,3 +47,9 @@
 pip install -e .
 
 ✗ ytest run -p fast -t api --env test -f fast_auto_product_screen_1
+
+# debug 仓库包安装
+
+pip install git+https://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:x-oauth-basic@github.com/leoyyer/ytest.git \
+ --index-url https://mirrors.aliyun.com/pypi/simple \
+ --no-build-isolation

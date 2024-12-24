@@ -17,10 +17,10 @@ setup(
     packages=find_packages(),
     package_data={
         "ytest": [
-            "utils/initializer/demo_suite.xlsx",
-            "utils/initializer/demo_api.xlsx",
-            "utils/templates/json_schema.json",
-            "utils/templates/environment",
+            "initializer/demo_suite.xlsx",
+            "initializer/demo_api.xlsx",
+            "templates/json_schema.json",
+            "templates/environment",
         ],  # 指定需要打包的文件
     },
     classifiers=[
