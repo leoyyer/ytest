@@ -1,0 +1,193 @@
+{
+  "type": "object",
+  "required": [
+    "file_name",
+    "case_name",
+    "type",
+    "project",
+    "base",
+    "case_list"
+  ],
+  "properties": {
+    "file_name": {
+      "type": "string"
+    },
+    "case_name": {
+      "type": "string"
+    },
+    "type": {
+      "type": "string"
+    },
+    "project": {
+      "type": "string"
+    },
+    "base": {
+      "type": "object",
+      "required": [
+        "project_name",
+        "project_team",
+        "base_url",
+        "environment",
+        "tester",
+        "desc",
+        "global_variable",
+        "base_assert",
+        "sql_list",
+        "case_len"
+      ],
+      "properties": {
+        "project_name": {
+          "type": "string"
+        },
+        "project_team": {
+          "type": "string"
+        },
+        "base_url": {
+          "type": "string"
+        },
+        "environment": {
+          "type": "string"
+        },
+        "tester": {
+          "type": "string"
+        },
+        "desc": {
+          "type": "string"
+        },
+        "blacklist": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "global_variable": {
+          "type": "object"
+        },
+        "base_assert": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["type", "text"],
+            "properties": {
+              "type": {
+                "type": "string"
+              },
+              "text": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "sql_list": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "object",
+              "required": ["type", "database", "sql"],
+              "properties": {
+                "type": {
+                  "type": "string"
+                },
+                "database": {
+                  "type": "string"
+                },
+                "sql": {
+                  "type": "string"
+                },
+                "key": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "case_len": {
+          "type": "integer"
+        }
+      }
+    },
+    "case_list": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["case_id", "title", "is_run", "model", "level", "api"],
+        "properties": {
+          "case_id": {
+            "type": "string"
+          },
+          "title": {
+            "type": ["string", "null"]
+          },
+          "is_run": {
+            "type": "string",
+            "enum": ["是", "否"]
+          },
+          "model": {
+            "type": ["string", "null"]
+          },
+          "level": {
+            "type": "string",
+            "enum": ["P0", "P1", "P2"]
+          },
+          "desc": {
+            "type": ["string", "null"]
+          },
+          "domain": {
+            "type": "string"
+          },
+          "api": {
+            "type": "string"
+          },
+          "headers": {
+            "type": ["object", "null", "string"],
+            "minLength": 0
+          },
+          "cookies": {
+            "type": ["object", "null", "string"],
+            "minLength": 0
+          },
+          "param": {
+            "type": ["object", "null", "string"],
+            "minLength": 0
+          },
+          "body": {
+            "type": ["object", "null", "string"],
+            "minLength": 0
+          },
+          "setup": {
+            "type": "array"
+          },
+          "teardown": {
+            "type": "array"
+          },
+          "extract_data": { "type": "array" },
+          "expected_data": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["type", "text"],
+              "properties": {
+                "type": {
+                  "type": "string"
+                },
+                "text": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "response": {
+            "type": ["string", "null"]
+          },
+          "black_list": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    }
+  }
+}
