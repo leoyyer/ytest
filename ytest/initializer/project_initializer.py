@@ -31,12 +31,8 @@ class ProjectInitializer:
         self.ini_files = ["default.ini", "test.ini", "beta.ini", "prod.ini"]
         self.hook_file = os.path.join(self.project_dir, "hook.py")
         self.public_file = os.path.join(self.case_dir, "public.py")
-        self.demo_api_file = os.path.join(
-            base_dir, "ytest", "templates", "demo_api.xlsx"
-        )
-        self.demo_suite_file = os.path.join(
-            base_dir, "ytest", "templates", "demo_suite.xlsx"
-        )
+        self.demo_api_file = os.path.join(base_dir, "templates", "demo_api.xlsx")
+        self.demo_suite_file = os.path.join(base_dir, "templates", "demo_suite.xlsx")
 
     def create_dir(self, path):
         if not os.path.exists(path):

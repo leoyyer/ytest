@@ -5,10 +5,10 @@ import pytest, argparse, os, allure
 from ytest.config.ConfFile import ConfigFile
 from ytest.common.Excel import ReadXlsData
 from ytest.common.Logger import logger
-from ytest.base.setupteardown import setupteardown
+from ytest.case.setupteardown import setupteardown
 from ytest.common.HookVariable import hook_variable
 from ytest.common.Api import RequestInterface
-from ytest.base.asserts import Assertions
+from ytest.case.asserts import Assertions
 from ytest.common.Time import ytest_time
 from ytest.common.File import file_operate
 
