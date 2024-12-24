@@ -17,8 +17,8 @@ setup(
     packages=find_packages(),
     package_data={
         "ytest": [
-            "initializer/demo_suite.xlsx",
-            "initializer/demo_api.xlsx",
+            "templates/demo_suite.xlsx",
+            "templates/demo_api.xlsx",
             "templates/json_schema.json",
             "templates/environment",
         ],  # 指定需要打包的文件
