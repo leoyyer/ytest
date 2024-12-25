@@ -105,7 +105,7 @@ class Allure:
             path ([type]): [description]
         """
         conf = ConfigFile(project=project)
-        template_path = os.path.join(config.ytest_path, "utils", "templates")
+        template_path = os.path.join(config.ytest_path, "ytest", "templates")
         env = Environment(loader=FileSystemLoader(template_path))
         template = env.get_template("environment")
         base_url = conf.get_conf("project", "base_url")

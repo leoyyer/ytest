@@ -22,63 +22,53 @@ class Assertions:
 
     def assert_method(self, data, expected_data_list):
         # 断言参数处理
-        if len(expected_data_list):
-            try:
-                for item in expected_data_list:
-                    # 存在${value}时,则替换变量的值
-                    i = hook_variable.resolve_vars(item, self.global_variable)
-                    if i["type"] == "response_body":
-                        self.log.info(f"进入断言[response_body]: " + str(i["text"]))
-                        assert self.assert_body(data, i["text"])
-                        continue
-                    elif i["type"] == "response_code":
-                        code = data["status_code"]
-                        self.log.info("进入断言 -> (response_code)验证response状态码")
-                        assert self.assert_code(code, i["text"])
-                        continue
-                    elif i["type"] == "response_incloud":
-                        self.log.info(
-                            "进入断言 -> (response_incloud)验证response body中是否包含预期字符串"
-                        )
-                        assert self.assert_in_text(data, i["text"])
-                        continue
-                    elif i["type"] == "response_not_incloud":
-                        self.log.info(
-                            "进入断言 -> (response_not_incloud)验证response body中是不否包含预期字符串"
-                        )
-                        assert self.assert_not_in_text(data, i["text"])
-                        continue
-                    elif i["type"] == "length_equals":
-                        assert self.length_equals(data, i)
-                        continue
-                    elif i["type"] == "length_equals_greater":
-                        assert self.length_equals_greater(data, i)
-                        continue
-                    elif i["type"] == "time":
-                        self.log.info(
-                            "进入断言 -> (time)验证response body响应时间小于预期最大响应时间,单位：毫秒"
-                        )
-                        assert self.assert_time(data["time_total"], i["text"])
-                        continue
-                    elif i["type"] == "mysql":
-                        self.log.info(
-                            "进入断言 -> (mysql)验证返回数据是否与数据库相一致"
-                        )
-                        assert self.assert_sql(i)
-                        continue
-                    elif i["type"] == "mongodb":
-                        self.log.info(
-                            "进入断言 -> (mongodb)验证返回数据是否与数据库相一致"
-                        )
-                        assert self.assert_mongo(i)
-                        continue
-                return True
-            except Exception as e:
-                self.log.error(f"断言失败 {e}")
-                return False
-        else:
+        if not expected_data_list:
             self.log.info("不存在断言")
             return True
+
+        # 定义断言映射
+        assertion_map = {
+            "response_body": self.assert_body,
+            "response_code": self.assert_code,
+            "response_incloud": self.assert_in_text,
+            "response_not_incloud": self.assert_not_in_text,
+            "length_equals": self.length_equals,
+            "length_equals_greater": self.length_equals_greater,
+            "time": self.assert_time,
+            "mysql": self.assert_sql,
+            "mongodb": self.assert_mongo,
+        }
+
+        # 逐个断言处理
+        for item in expected_data_list:
+            # 处理变量替换
+            item = hook_variable.resolve_vars(item, self.global_variable)
+
+            # 获取断言类型
+            assert_type = item.get("type")
+            assert_value = item.get("text")
+
+            # 检查类型并执行断言
+            if assert_type in assertion_map:
+                self.log.info(f"进入断言 -> ({assert_type})")
+                try:
+                    if assert_type in ["response_code", "time"]:
+                        # 特殊处理一些需要单独参数的类型
+                        assert assertion_map[assert_type](data, assert_value)
+                    elif assert_type in ["mysql", "mongodb"]:
+                        # 特殊处理数据库断言
+                        assert assertion_map[assert_type](assert_value)
+                    else:
+                        # 一般的响应断言
+                        assert assertion_map[assert_type](data, assert_value)
+                except Exception as e:
+                    self.log.error(f"断言失败: {assert_type} - {e}")
+                    return False
+            else:
+                self.log.warning(f"未知断言类型: {assert_type}")
+                return False
+
+        return True
 
     def assert_code(self, code, expected_code):
         """
@@ -92,10 +82,7 @@ class Assertions:
             self.log.info("assert_code 断言 -> 断言成功")
             return True
         except Exception as e:
-            self.log.error(
-                "断言失败 <- expected_code is %s, statusCode is %s "
-                % (expected_code, code)
-            )
+            self.log.error("断言失败 <- expected_code is %s, statusCode is %s " % (expected_code, code))
             raise AssertionError(f"response状态码断言失败,{e}")
 
     def assert_body(self, body, expected_data):
@@ -106,9 +93,7 @@ class Assertions:
         :return:
         """
         try:
-            expected_data = {
-                i.split("=")[0]: i.split("=")[1] for i in expected_data.split(";")
-            }
+            expected_data = {i.split("=")[0]: i.split("=")[1] for i in expected_data.split(";")}
             for key, value in expected_data.items():
                 realdata = jsonpath.jsonpath(body["body"], key)
                 if str(realdata[0]) == str(value):
@@ -117,10 +102,7 @@ class Assertions:
                     continue
                 else:
                     result = False
-                    self.log.error(
-                        "assert_body 断言失败 <- %s实际返回值:%s, %s预期值:%s "
-                        % (key, realdata[0], key, value)
-                    )
+                    self.log.error("assert_body 断言失败 <- %s实际返回值:%s, %s预期值:%s " % (key, realdata[0], key, value))
                     break
             return result
         except Exception as e:
@@ -135,9 +117,7 @@ class Assertions:
         :return:
         """
         try:
-            expected_data = {
-                i.split(" in ")[0]: i.split(" in ")[1] for i in expected_data.split(";")
-            }
+            expected_data = {i.split(" in ")[0]: i.split(" in ")[1] for i in expected_data.split(";")}
             for key, value in expected_data.items():
                 realdata = jsonpath.jsonpath(body["body"], key)
                 if str(value) in str(realdata[0]):
@@ -145,10 +125,7 @@ class Assertions:
                     self.log.info("assert_in_text 断言 -> 断言成功")
                     continue
                 else:
-                    self.log.error(
-                        "断言失败  <- %s实际返回值:%s, %s预期值:%s "
-                        % (key, realdata[0], key, value)
-                    )
+                    self.log.error("断言失败  <- %s实际返回值:%s, %s预期值:%s " % (key, realdata[0], key, value))
                     result = False
             return result
         except Exception as e:
@@ -163,10 +140,7 @@ class Assertions:
         :return:
         """
         try:
-            expected_data = {
-                i.split(" not_in ")[0]: i.split(" not_in ")[1]
-                for i in expected_data.split(";")
-            }
+            expected_data = {i.split(" not_in ")[0]: i.split(" not_in ")[1] for i in expected_data.split(";")}
             for key, value in expected_data.items():
                 realdata = jsonpath.jsonpath(body["body"], key)
                 if str(value) not in str(realdata[0]):
@@ -174,10 +148,7 @@ class Assertions:
                     self.log.info("assert_not_in_text 断言 -> 断言成功")
                     continue
                 else:
-                    self.log.error(
-                        "断言失败 <- %s实际返回值:%s, %s预期值:%s "
-                        % (key, realdata[0], key, value)
-                    )
+                    self.log.error("断言失败 <- %s实际返回值:%s, %s预期值:%s " % (key, realdata[0], key, value))
                     result = False
             return result
         except Exception as e:
@@ -196,10 +167,7 @@ class Assertions:
             self.log.info("assert_text断言 -> 断言成功")
             return True
         except Exception as e:
-            self.log.error(
-                "断言失败 <- Response body != expected_msg, expected_msg is %s, body is %s"
-                % (expected_msg, body)
-            )
+            self.log.error("断言失败 <- Response body != expected_msg, expected_msg is %s, body is %s" % (expected_msg, body))
             raise AssertionError(f"断言失败,{e}")
 
     def assert_time(self, time, expected_time):
@@ -214,10 +182,7 @@ class Assertions:
             self.log.info("assert_time 断言 -> 断言成功")
             return True
         except Exception as e:
-            self.log.error(
-                "断言失败 <- Response time > expected_time, expected_time is %s, time is %s"
-                % (expected_time, time)
-            )
+            self.log.error("断言失败 <- Response time > expected_time, expected_time is %s, time is %s" % (expected_time, time))
 
             raise AssertionError(f"断言失败,{e}")
 
@@ -228,26 +193,18 @@ class Assertions:
         2. 支持 mysql查询,比对: {"type":"length_equals","text":"res=body.items", "database":"starship_test_ops","sql":"select count(*) from xxxxx where xxxxx"}
         3. 支持 函数返回值与body,比对: {"type":"length_equals","text":"res=body.items", "func":"${create_app_code()}"}
         """
-        _expect = {
-            i.split("=")[0]: i.split("=")[1] for i in expected_data["text"].split(";")
-        }
+        _expect = {i.split("=")[0]: i.split("=")[1] for i in expected_data["text"].split(";")}
         if len(_expect) == 1:
             value = next(iter(_expect.values()))
             res = jsonpath.jsonpath(body, f"$.{value}")
             if isinstance(res, list):
                 if "len" in expected_data:
-                    self.log.info(
-                        "预期值: {0}, 实际返回值: {1}".format(
-                            expected_data["len"], len(res[0])
-                        )
-                    )
+                    self.log.info("预期值: {0}, 实际返回值: {1}".format(expected_data["len"], len(res[0])))
                     assert len(res[0]) == int(expected_data["len"])
                     self.log.info("assert_body 断言 -> 断言成功")
                     return True
                 elif "database" in expected_data:
-                    _sql = hook_variable.resolve_vars(
-                        expected_data["sql"], self.global_variable
-                    )
+                    _sql = hook_variable.resolve_vars(expected_data["sql"], self.global_variable)
                     db = MysqlDb(
                         database=expected_data["database"],
                         project=self.project,
@@ -257,49 +214,32 @@ class Assertions:
                     self.log.info(f"执行sql, 返回结果: {result}")
                     if len(result) > 0:
                         sql_len = int(result[0][list(result[0].keys())[0]])
-                        self.log.info(
-                            "预期值: {0}, sql实际返回值: {1}".format(len(res), sql_len)
-                        )
+                        self.log.info("预期值: {0}, sql实际返回值: {1}".format(len(res), sql_len))
                         assert int(len(res)) == int(sql_len)
                         return True
                     else:
-                        self.log.info(
-                            "预期值: {0}, sql实际返回值: {1}".format(len(res), 0)
-                        )
+                        self.log.info("预期值: {0}, sql实际返回值: {1}".format(len(res), 0))
                         assert int(len(res)) == 0
                         return True
                 elif "func" in expected_data:
-                    func_list = re.findall(
-                        r"(?<=\$\{)(.*)(?=\()", expected_data["func"]
-                    )
+                    func_list = re.findall(r"(?<=\$\{)(.*)(?=\()", expected_data["func"])
                     _func_arg = expected_data["func"].split("(")[1].split(")")[0]
-                    func_arg = string.Template(_func_arg).substitute(
-                        self.global_variable
-                    )
+                    func_arg = string.Template(_func_arg).substitute(self.global_variable)
                     hook_list = hook_variable.get_hook_name()
                     if func_arg:
-                        kwargs = dict(
-                            l.replace(" ", "").split("=", 1)
-                            for l in func_arg.split(",")
-                        )
-                        value = hook_variable.get_hook_variable(
-                            hook_list, func_list[0], **kwargs
-                        )
+                        kwargs = dict(l.replace(" ", "").split("=", 1) for l in func_arg.split(","))
+                        value = hook_variable.get_hook_variable(hook_list, func_list[0], **kwargs)
                     else:
                         value = hook_variable.get_hook_variable(hook_list, func_list[0])
                     assert int(len(res)) == int(value)
-                    self.log.info(
-                        "预期值: {0}, 函数实际返回值: {1}".format(len(res), value)
-                    )
+                    self.log.info("预期值: {0}, 函数实际返回值: {1}".format(len(res), value))
                     return True
             else:
                 self.log.error("断言失败,提取的内容并非列表,无法进行断言")
                 return False
         else:
             self.log.error("断言数据解析失败,格式错误,length_equals:text只支持一个参数")
-            raise AssertionError(
-                "断言数据解析失败,格式错误,length_equals:text只支持一个参数"
-            )
+            raise AssertionError("断言数据解析失败,格式错误,length_equals:text只支持一个参数")
 
     def length_equals_greater(self, body, expected_data):
         """
@@ -309,27 +249,19 @@ class Assertions:
         2. 支持 mysql查询,比对: {"type":"length_equals_greater","text":"res=body.items", "database":"starship_test_ops","sql":"select count(*) from xxxxx where xxxxx"}
         3. 支持 函数返回值与body,比对: {"type":"length_equals_greater","text":"res=body.items", "func":"${create_app_code()}"}
         """
-        _expect = {
-            i.split("=")[0]: i.split("=")[1] for i in expected_data["text"].split(";")
-        }
+        _expect = {i.split("=")[0]: i.split("=")[1] for i in expected_data["text"].split(";")}
         if len(_expect) == 1:
             value = next(iter(_expect.values()))
             res = jsonpath.jsonpath(body, f"$.{value}")
             if isinstance(res, list):
                 if "len" in expected_data:
-                    self.log.info(
-                        "预期值: {0}, 实际返回值: {1}".format(
-                            expected_data["len"], len(res[0])
-                        )
-                    )
+                    self.log.info("预期值: {0}, 实际返回值: {1}".format(expected_data["len"], len(res[0])))
                     assert len(res[0]) > int(expected_data["len"])
                     self.log.info("assert_body 断言 -> 断言成功")
                     return True
 
                 elif "database" in expected_data:
-                    _sql = hook_variable.resolve_vars(
-                        expected_data["sql"], self.global_variable
-                    )
+                    _sql = hook_variable.resolve_vars(expected_data["sql"], self.global_variable)
                     db = MysqlDb(
                         database=expected_data["database"],
                         project=self.project,
@@ -339,49 +271,32 @@ class Assertions:
                     self.log.info(f"执行sql, 返回结果: {result}")
                     if len(result) > 0:
                         sql_len = int(result[0][list(result[0].keys())[0]])
-                        self.log.info(
-                            "预期值: {0}, sql实际返回值: {1}".format(len(res), sql_len)
-                        )
+                        self.log.info("预期值: {0}, sql实际返回值: {1}".format(len(res), sql_len))
                         assert int(len(res)) > int(sql_len)
                         return True
                     else:
-                        self.log.info(
-                            "预期值: {0}, sql实际返回值: {1}".format(len(res), 0)
-                        )
+                        self.log.info("预期值: {0}, sql实际返回值: {1}".format(len(res), 0))
                         assert int(len(res)) == 0
                         return True
                 elif "func" in expected_data:
-                    func_list = re.findall(
-                        r"(?<=\$\{)(.*)(?=\()", expected_data["func"]
-                    )
+                    func_list = re.findall(r"(?<=\$\{)(.*)(?=\()", expected_data["func"])
                     _func_arg = expected_data["func"].split("(")[1].split(")")[0]
-                    func_arg = string.Template(_func_arg).substitute(
-                        self.global_variable
-                    )
+                    func_arg = string.Template(_func_arg).substitute(self.global_variable)
                     hook_list = hook_variable.get_hook_name()
                     if func_arg:
-                        kwargs = dict(
-                            l.replace(" ", "").split("=", 1)
-                            for l in func_arg.split(",")
-                        )
-                        value = hook_variable.get_hook_variable(
-                            hook_list, func_list[0], **kwargs
-                        )
+                        kwargs = dict(l.replace(" ", "").split("=", 1) for l in func_arg.split(","))
+                        value = hook_variable.get_hook_variable(hook_list, func_list[0], **kwargs)
                     else:
                         value = hook_variable.get_hook_variable(hook_list, func_list[0])
                     assert int(len(res)) > int(value)
-                    self.log.info(
-                        "预期值: {0}, 函数实际返回值: {1}".format(len(res), value)
-                    )
+                    self.log.info("预期值: {0}, 函数实际返回值: {1}".format(len(res), value))
                     return True
             else:
                 self.log.error("断言失败,提取的内容并非列表,无法进行断言")
                 return False
         else:
             self.log.error("断言数据解析失败,格式错误,length_equals:text只支持一个参数")
-            raise AssertionError(
-                "断言数据解析失败,格式错误,length_equals:text只支持一个参数"
-            )
+            raise AssertionError("断言数据解析失败,格式错误,length_equals:text只支持一个参数")
 
     def assert_sql(self, expected_data):
         """
@@ -391,16 +306,10 @@ class Assertions:
         :return:
         """
         try:
-            db = MysqlDb(
-                database=expected_data["database"], project=self.project, env=self.env
-            )
+            db = MysqlDb(database=expected_data["database"], project=self.project, env=self.env)
             # self.log.info("sql连接成功,开始进入sql断言")
             try:
-                c = (
-                    db.select_db(expected_data["sql"])
-                    if db.select_db(expected_data["sql"])
-                    else "None"
-                )
+                c = db.select_db(expected_data["sql"]) if db.select_db(expected_data["sql"]) else "None"
                 self.log.info(f"sql执行结果: {c}")
                 # 断言处理
                 expectedresult = expected_data["text"].split("=")
@@ -412,19 +321,14 @@ class Assertions:
                     # self.log.info(f"result实际返回值: {res}")
                     assert realdata == res.replace(" ", "")
                 else:
-                    expected_data_dict = {
-                        i.split("=")[0]: i.split("=")[1]
-                        for i in expected_data["text"].split(";")
-                    }
+                    expected_data_dict = {i.split("=")[0]: i.split("=")[1] for i in expected_data["text"].split(";")}
                     for key, value in expected_data_dict.items():
                         i = re.findall("[[](.*?)[]]", key, re.I | re.M)[0]
                         finally_key = key.split(".")[-1]
                         realdata = self.find(finally_key, c[int(i)])
                         # self.log.info(f"{key}预期值: {value}")
                         # self.log.info(f"{key}实际返回值: {realdata}")
-                        assert str(realdata).replace(" ", "") == str(value).replace(
-                            " ", ""
-                        )
+                        assert str(realdata).replace(" ", "") == str(value).replace(" ", "")
                         # self.log.info(f"{key}断言成功")
                         self.log.info("mysql 断言 -> 断言成功")
                         # self.log.info("--------------------------------------------------------")
@@ -436,6 +340,9 @@ class Assertions:
         except Exception as e:
             self.log.error("数据库连接失败: %s" % (e))
             raise AssertionError(f"断言失败,{e}")
+
+    def assert_mongo(self, expected_data):
+        pass
 
     def find(self, target, dictData, notFound="没找到"):
         # 查找单个键
