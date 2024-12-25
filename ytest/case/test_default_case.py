@@ -154,7 +154,7 @@ if __name__ == "__main__":
                 "-v",  # 启用详细模式
                 "--cache-clear",  # 清除 pytest 缓存
                 "--pyargs",
-                "ytest.utils.case.test_default_case",  # 注意这里的格式
+                "ytest.case.test_default_case",  # 注意这里的格式
                 "--disable-warnings",  # 禁用测试中的警告输出
                 "--tb=short",  # 错误输出的回溯信息格式
                 "-x",  # 遇到第一个失败后立即停止测试
@@ -181,7 +181,7 @@ if __name__ == "__main__":
                 "3",  # 失败用例重试次数为3次
                 "--maxfail=3",  # 3个失败之后停止测试
                 "--pyargs",
-                "ytest.utils.case.test_default_case",  # 注意这里的格式
+                "ytest.case.test_default_case",  # 注意这里的格式
                 f"--alluredir={date_report_path}",  # 报告的路径
             ]
         )
@@ -203,7 +203,7 @@ if __name__ == "__main__":
                 "--disable-warnings",  # 禁用测试中的警告输出
                 "--maxfail=3",  # 3个失败之后停止测试
                 "--pyargs",
-                "ytest.utils.case.test_default_case",  # 注意这里的格式
+                "ytest.case.test_default_case",  # 注意这里的格式
                 f"--alluredir={default_report_path}",  # 报告的路径
             ]
         )

@@ -59,6 +59,36 @@ class Flile:
         ]
         if not ini_files:
             raise FileNotFoundError(f"{folder} 下,ini 配置文件不存在,请检查")
+        if file is None:
+            # 遍历folder下的全部文件夹，筛选出.xlsx文件
+            case_list = []
+            for root, dirs, files in os.walk(folder):
+                for name in files:
+                    if (
+                        name.endswith(".xlsx")
+                        and "_stop" not in name
+                        and "._" not in name
+                    ):
+                        case_list.append(os.path.join(root, name))
+        else:
+            # 判断路径是否存在
+            path = os.path.join(folder, file)
+            if not os.path.exists(path):
+                raise Exception(f"{folder} 下, 文件 {file} 不存在,请检查")
+            # 遍历路径下的全部文件夹，筛选出.xlsx文件
+            case_list = []
+            for root, dirs, files in os.walk(path):
+                for name in files:
+                    if (
+                        name.endswith(".xlsx")
+                        and "_stop" not in name
+                        and "._" not in name
+                    ):
+                        case_list.append(os.path.join(root, name))
+        if len(case_list):
+            return case_list
+        else:
+            raise Exception(f"{folder} 下不存在测试用例,请检查")
 
     def default_folder(self, directory_path: str):
         # 尝试删除目录
