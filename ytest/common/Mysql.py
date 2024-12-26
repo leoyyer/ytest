@@ -103,11 +103,23 @@ class MysqlDb:
             sql: 执行的 SQL 查询语句。
 
         Returns:
-            查询结果（以字典形式返回）。
+            查询结果（以字典形式返回），
+            如果查询结果包含多条数据且多个维度，返回第一个维度第一条数据的值并转换为字符串。
         """
         self.conn.ping(reconnect=True)  # 检查数据库连接是否断开，自动重连
-        self.cur.execute(sql)  # 执行 SQL
-        return self.cur.fetchall()  # 返回查询结果
+        self.cur.execute(sql)  # 执行 SQL 查询
+        result = self.cur.fetchall()  # 获取查询结果
+
+        if result:
+            # 处理多条数据，取第一个维度的第一条数据
+            first_row = result[0]  # 获取第一条记录
+            first_key = list(first_row.keys())[0]  # 获取第一个维度的 key
+            first_value = first_row[first_key]  # 获取该 key 对应的值
+
+            # 返回值转换为 str 类型
+            return str(first_value)
+
+        return ""  # 如果查询结果为空，返回 None
 
     def execute_db(self, sql):
         """
