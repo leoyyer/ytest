@@ -72,8 +72,8 @@ class RequestInterface(object):
         # 类型检查
         self.__validate_type(interface_domain, [str], "interface_domain")
         self.__validate_type(interface_api, [str], "interface_api")
-        self.__validate_type(interface_query, [dict, list], "interface_query")
-        self.__validate_type(interface_param, [dict, list], "interface_param")
+        self.__validate_type(interface_query, [dict, list, str], "interface_query")
+        self.__validate_type(interface_param, [dict, list, str], "interface_param")
         self.__validate_type(request_type, [str], "request_type")
         self.__validate_type(headers, [dict, None, ""], "headers")
         self.__validate_type(cookies, [dict, None, ""], "cookies")

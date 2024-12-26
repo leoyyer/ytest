@@ -52,28 +52,51 @@ class SetupTearDown:
 
     def sql_run(self, case_data, sql_list, product, env, global_variable):
         """
-        执行sql语句,暂时只支持mysql
+        执行sql语句，暂时只支持mysql。
+
         Args:
-            sql_list (list): Excel中的sql语句
-            product (str): 需要执行的项目
-            env (str): 读取的sql配置信息文件
-            global_variable (dict): 全局变量表
+            case_data (list): 包含需要执行的用例数据（从Excel读取的）。
+            sql_list (list): 存储SQL语句和相关信息。
+            product (str): 当前项目名。
+            env (str): 当前环境名。
+            global_variable (dict): 全局变量表，用于替换SQL中的变量。
         """
-        now_case_list = case_data[0]["sql_list"]
+        # 如果case_data为空或sql_list为空，直接返回
+        if not isinstance(case_data, list) or len(case_data) == 0:
+            return
+        if not isinstance(sql_list, list) or len(sql_list) == 0:
+            return
+
+        # 获取当前用例的SQL列表
+        now_case_list = case_data[0].get("sql_list", [])
+        if not now_case_list:
+            return
+
+        # 找到匹配的SQL语句
         _now_case_list = []
         for i in now_case_list:
-            for s in sql_list:
-                if i in s:
-                    _now_case_list.append(s[i])
-                    break
-        if len(_now_case_list) > 0:
-            for sql in _now_case_list:
-                if sql["type"] == "mysql":
-                    _sql = string.Template(sql["sql"]).substitute(global_variable)
-                    DB = MysqlDb(sql["database"], product, env)
-                    result = DB.select_db(_sql)
-                    if "key" in sql:
-                        global_variable.update({sql["key"]: result})
+            # 查找sql_list中包含当前用例的SQL
+            matched_sql = next((s[i] for s in sql_list if i in s), None)
+            if matched_sql:
+                _now_case_list.append(matched_sql)
+
+        if not _now_case_list:
+            raise Exception("没有找到匹配的SQL语句")
+
+        # 执行SQL语句
+        for sql in _now_case_list:
+            if sql.get("type") == "mysql":
+                _sql = string.Template(sql["sql"]).substitute(global_variable)  # 替换SQL中的全局变量
+                print(f"待执行SQL:{_sql}\n")
+
+                # 执行数据库查询
+                DB = MysqlDb(sql["database"], product, env)
+                result = DB.select_db(_sql)
+
+                # 如果SQL包含"key"，将结果保存到global_variable中
+                if "key" in sql:
+                    global_variable[sql["key"]] = result
+                    print(f"将查询结果更新到全局变量: {sql['key']}\n")
 
     def extract(self, response, extract_param, global_variable):
         """
@@ -87,7 +110,7 @@ class SetupTearDown:
                 value = next(iter(_extract.values()))
                 res = jsonpath.jsonpath(response, f"$.{value}")
                 global_variable.update({next(iter(_extract.keys())): res[0]})
-        logger.info(f"[全局变量列表更新] >>> \n{global_variable}")
+        print(f"[全局变量列表更新] >>> \n{global_variable}")
 
 
 setupteardown = SetupTearDown()
