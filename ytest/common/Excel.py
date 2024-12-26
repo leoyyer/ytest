@@ -86,11 +86,7 @@ class ReadXlsData:
         # 获取当前模块的名称
         exl = self.exl["case_name"]
         # 从配置文件中获取黑名单，以逗号分隔
-        value = (
-            self.base_conf["blacklist"].split(",")
-            if self.base_conf["blacklist"]
-            else []
-        )
+        value = self.base_conf["blacklist"].split(",") if self.base_conf["blacklist"] else []
         # 将黑名单更新到全局变量 BLACK_LIST 中，以模块名和字段名为 key
         BLACK_LIST.update({f"{exl}_black_list": value})
         # 将黑名单更新到Base中，以模块名和字段名为 key
@@ -116,12 +112,8 @@ class ReadXlsData:
                     assert_dict = json.loads(assert_str)  # 尝试将断言字符串转换为字典
                     result_list.append(assert_dict)
                 except json.JSONDecodeError:
-                    raise AttributeError(
-                        f"公共断言格式不正确,请检查: {assert_str}"
-                    )  # 如果无法转换为字典，报异常
-            result_str = ",".join(
-                json.dumps(assert_dict) for assert_dict in result_list
-            )
+                    raise AttributeError(f"公共断言格式不正确,请检查: {assert_str}")  # 如果无法转换为字典，报异常
+            result_str = ",".join(json.dumps(assert_dict) for assert_dict in result_list)
             self.exl["base"].update({"base_assert": result_list})
             return result_str
         except Exception as e:
@@ -134,9 +126,7 @@ class ReadXlsData:
             table = self.table_rows(4)  # 获取第4个表单的行数和列数
             result_list = []  # 存储所有合法的断言字典
             for n in range(1, table.nrows):
-                assert_str = hook_variable.resolve_vars(
-                    table.cell_value(n, 0), self.global_variable
-                )
+                assert_str = hook_variable.resolve_vars(table.cell_value(n, 0), self.global_variable)
                 # 确保 assert_str 是字符串类型
                 if not isinstance(assert_str, str):
                     raise AttributeError(f"预期字符串类型, 但得到: {type(assert_str)}")
@@ -145,9 +135,7 @@ class ReadXlsData:
                     assert_dict = json.loads(assert_str)
                     result_list.append({f"{n}": assert_dict})
                 except json.JSONDecodeError:
-                    raise pymysql.ProgrammingError(
-                        f"sql格式不正确,请检查: {assert_str}"
-                    )
+                    raise pymysql.ProgrammingError(f"sql格式不正确,请检查: {assert_str}")
                     # 如果无法转换为字典，报异常
             self.exl["base"].update({"sql_list": result_list})
         except Exception as e:
@@ -181,7 +169,7 @@ class ReadXlsData:
                 expecte_list = target_exp
             return expecte_list
         except Exception as e:
-            raise Exception(f"断言解析失败:{match_str} ----> {e}")
+            raise Exception(f"断言解析失败:{match_str} >>> {e}")
 
     def get_variable_data(self):
         """
@@ -210,25 +198,15 @@ class ReadXlsData:
                                 value = type_converter[var_type](value)
                             GLOBAL_VARIABLE[f"{table.cell_value(n, 0)}"] = value
                         except (ValueError, KeyError) as e:
-                            logger.error(
-                                f"类型转换失败, 请检查变量表。变量类型: {var_type}, 变量值: {value}, 异常信息: {e}"
-                            )
-                            raise ValueError(
-                                f"类型转换失败, 请检查变量表。变量类型: {var_type}, 变量值: {value}, 异常信息: {e}"
-                            )
+                            logger.error(f"类型转换失败, 请检查变量表。变量类型: {var_type}, 变量值: {value}, 异常信息: {e}")
+                            raise ValueError(f"类型转换失败, 请检查变量表。变量类型: {var_type}, 变量值: {value}, 异常信息: {e}")
                     else:
                         value = table.cell_value(n, 1)
                         try:
-                            GLOBAL_VARIABLE[f"{table.cell_value(n, 0)}"] = json.loads(
-                                value
-                            )
+                            GLOBAL_VARIABLE[f"{table.cell_value(n, 0)}"] = json.loads(value)
                         except json.JSONDecodeError as e:
-                            logger.error(
-                                f"JSON 解析失败, 请检查变量表。变量类型: {var_type}, 变量值: {value}, 异常信息: {e}"
-                            )
-                            raise ValueError(
-                                f"JSON 解析失败, 请检查变量表。变量类型: {var_type}, 变量值: {value}, 异常信息: {e}"
-                            )
+                            logger.error(f"JSON 解析失败, 请检查变量表。变量类型: {var_type}, 变量值: {value}, 异常信息: {e}")
+                            raise ValueError(f"JSON 解析失败, 请检查变量表。变量类型: {var_type}, 变量值: {value}, 异常信息: {e}")
         except (ValueError, KeyError) as e:
             logger.error(f"类型转换失败, 请检查变量表。异常信息: {e}")
             raise ValueError(f"类型转换失败, 请检查变量表。异常信息: {e}")
@@ -276,118 +254,70 @@ class ReadXlsData:
             update_dict = {
                 0: (
                     "case_id",
-                    hook_variable.resolve_vars(
-                        table.cell_value(n, 0), self.global_variable
-                    ),
+                    hook_variable.resolve_vars(table.cell_value(n, 0), self.global_variable),
                 ),
                 1: (
                     "title",
-                    hook_variable.resolve_vars(
-                        table.cell_value(n, 1), self.global_variable
-                    ),
+                    hook_variable.resolve_vars(table.cell_value(n, 1), self.global_variable),
                 ),
                 2: (
                     "is_run",
-                    hook_variable.resolve_vars(
-                        table.cell_value(n, 2), self.global_variable
-                    ),
+                    hook_variable.resolve_vars(table.cell_value(n, 2), self.global_variable),
                 ),
                 3: (
                     "model",
-                    hook_variable.resolve_vars(
-                        table.cell_value(n, 3), self.global_variable
-                    ),
+                    hook_variable.resolve_vars(table.cell_value(n, 3), self.global_variable),
                 ),
                 4: (
                     "level",
-                    hook_variable.resolve_vars(
-                        table.cell_value(n, 4), self.global_variable
-                    ),
+                    hook_variable.resolve_vars(table.cell_value(n, 4), self.global_variable),
                 ),
                 5: (
                     "desc",
-                    hook_variable.resolve_vars(
-                        table.cell_value(n, 5), self.global_variable
-                    ),
+                    hook_variable.resolve_vars(table.cell_value(n, 5), self.global_variable),
                 ),
                 6: (
                     "domain",
-                    (
-                        table.cell_value(n, 6)
-                        if table.cell_value(n, 6)
-                        else self.exl["base"]["base_url"]
-                    ),
+                    (table.cell_value(n, 6) if table.cell_value(n, 6) else self.exl["base"]["base_url"]),
                 ),
                 7: (
                     "api",
-                    hook_variable.resolve_vars(
-                        table.cell_value(n, 7), self.global_variable
-                    ),
+                    hook_variable.resolve_vars(table.cell_value(n, 7), self.global_variable),
                 ),
                 8: ("method", table.cell_value(n, 8)),
                 9: (
                     "headers",
-                    hook_variable.str_to_dict(
-                        hook_variable.resolve_vars(
-                            table.cell_value(n, 9), self.global_variable
-                        )
-                    ),
+                    hook_variable.str_to_dict(hook_variable.resolve_vars(table.cell_value(n, 9), self.global_variable)),
                 ),
                 10: (
                     "cookies",
-                    hook_variable.str_to_dict(
-                        hook_variable.resolve_vars(
-                            table.cell_value(n, 10), self.global_variable
-                        )
-                    ),
+                    hook_variable.str_to_dict(hook_variable.resolve_vars(table.cell_value(n, 10), self.global_variable)),
                 ),
                 11: (
                     "param",
-                    hook_variable.str_to_dict(
-                        hook_variable.resolve_vars(
-                            table.cell_value(n, 11), self.global_variable
-                        )
-                    ),
+                    hook_variable.str_to_dict(hook_variable.resolve_vars(table.cell_value(n, 11), self.global_variable)),
                 ),
                 12: (
                     "body",
-                    hook_variable.str_to_dict(
-                        hook_variable.resolve_vars(
-                            table.cell_value(n, 12), self.global_variable
-                        )
-                    ),
+                    hook_variable.str_to_dict(hook_variable.resolve_vars(table.cell_value(n, 12), self.global_variable)),
                 ),
                 13: (
                     "setup",
-                    (
-                        self.update_sql_list(table, n, 13)
-                        if self.update_sql_list(table, n, 13)
-                        else []
-                    ),
+                    (self.update_sql_list(table, n, 13) if self.update_sql_list(table, n, 13) else []),
                 ),
                 14: (
                     "teardown",
-                    (
-                        self.update_sql_list(table, n, 14)
-                        if self.update_sql_list(table, n, 14)
-                        else []
-                    ),
+                    (self.update_sql_list(table, n, 14) if self.update_sql_list(table, n, 14) else []),
                 ),
                 15: ("extract_data", self._extract_data(table, n, 15)),
                 16: (
                     "expected_data",
-                    self.target_exp_data(
-                        self.exl["base"]["base_assert"], table.cell_value(n, 16)
-                    ),
+                    self.target_exp_data(self.exl["base"]["base_assert"], table.cell_value(n, 16)),
                 ),
                 17: ("response", hook_variable.str_to_dict(table.cell_value(n, 17))),
                 18: (
                     "black_list",
-                    (
-                        str(table.cell_value(n, 18)).split(",")
-                        if table.cell_value(n, 18)
-                        else [] + self.exl["base"]["blacklist"]
-                    ),
+                    (str(table.cell_value(n, 18)).split(",") if table.cell_value(n, 18) else [] + self.exl["base"]["blacklist"]),
                 ),
             }
             for i in update_dict:
@@ -412,14 +342,10 @@ class ReadXlsData:
                         for item in sql_list:
                             for key in self.exl["base"]["sql_list"]:
                                 if item in key:
-                                    new_list.append(
-                                        self.exl["base"]["sql_list"][key[item]]
-                                    )
+                                    new_list.append(self.exl["base"]["sql_list"][key[item]])
                     else:
                         # 确保 resolve_vars 返回的是字符串
-                        resolved_value = hook_variable.resolve_vars(
-                            table.cell_value(m, n), self.global_variable
-                        )
+                        resolved_value = hook_variable.resolve_vars(table.cell_value(m, n), self.global_variable)
                         if isinstance(resolved_value, str):
                             try:
                                 _row = json.loads(resolved_value)
@@ -429,13 +355,9 @@ class ReadXlsData:
                         else:
                             new_list.append(resolved_value)
                 except json.JSONDecodeError:
-                    raise ValueError(
-                        f"Failed to parse JSON from cell value: {cell_value}"
-                    )
+                    raise ValueError(f"Failed to parse JSON from cell value: {cell_value}")
             else:
-                raise ValueError(
-                    "Cell value is not a string and cannot be processed by json.loads"
-                )
+                raise ValueError("Cell value is not a string and cannot be processed by json.loads")
         else:
             # print("Cell value is empty, returning an empty list.")
             # 如果 cell_value 为空，返回一个空列表

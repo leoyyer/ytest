@@ -42,12 +42,9 @@ class RequestInterface(object):
         return new_param
 
     def __validate_type(self, param, expected_types, param_name: str):
-        self.log.info(f"[{param_name}]  >>> " + f"{param}")
         if param is not None and not isinstance(param, tuple(expected_types)):
             expected_types_names = ", ".join([t.__name__ for t in expected_types])
-            raise TypeError(
-                f"参数 '{param_name}' 必须是 {expected_types_names} 类型中的一个, 但得到的是 {type(param).__name__}"
-            )
+            raise TypeError(f"参数 '{param_name}' 必须是 {expected_types_names} 类型中的一个, 但得到的是 {type(param).__name__}")
 
     def http_request(
         self,
