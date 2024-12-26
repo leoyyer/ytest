@@ -47,9 +47,7 @@ def pytest_sessionfinish(session, exitstatus):
         * 添加用例的历史执行情况展示
     """
     # 获取命令行参数的值
-    alluredir_args = [
-        arg for arg in session.config.invocation_params.args if "--alluredir" in arg
-    ]
+    alluredir_args = [arg for arg in session.config.invocation_params.args if "--alluredir" in arg]
     if len(alluredir_args) > 0:
         args = alluredir_args[0]
         # 解析参数
@@ -101,10 +99,7 @@ def pytest_collection_modifyitems(config, items):
                 # 获取函数的参数列表
                 params = inspect.signature(obj).parameters
                 # 检查是否有参数具有默认值
-                if any(
-                    param.default != inspect.Parameter.empty
-                    for param in params.values()
-                ):
+                if any(param.default != inspect.Parameter.empty for param in params.values()):
                     # 执行函数并捕获结果
                     result = obj()
                     # 将结果添加到 hook_result 列表中
@@ -131,9 +126,7 @@ def pytest_runtest_setup(item):
     """
     yield
     request_object = item._request
-    setup_data = request_object.node.get_closest_marker("parametrize").args[1][
-        request_object.node.callspec.indices["case"]
-    ]["setup"]
+    setup_data = request_object.node.get_closest_marker("parametrize").args[1][request_object.node.callspec.indices["case"]]["setup"]
 
 
 @pytest.hookimpl(tryfirst=True, hookwrapper=True)
@@ -174,8 +167,6 @@ def pytest_terminal_summary(config):
     # 获取 pytest 命令行参数
     option = config.option  # 通过 config 访问命令行的所有参数
     allure_report_dir = option.allure_report_dir  # 提取 allure_report_dir
-    # print(option.__dict__)
-    # print(f"\nAllure 报告目录: {allure_report_dir}")  # 单独输出 Allure 报告目录
     # 规范路径，兼容 Linux 和 Windows
     normalized_path = os.path.normpath(allure_report_dir)
     # 分割路径并提取最后一个含有数字的部分

@@ -318,8 +318,6 @@ class Assertions:
                     realdata = str(c).replace(" ", "")
                     expectedresult = expected_data["text"].split("=")
                     res = expectedresult[1]
-                    # self.log.info(f"预期值: {realdata}")
-                    # self.log.info(f"result实际返回值: {res}")
                     assert realdata == res.replace(" ", "")
                 else:
                     expected_data_dict = {i.split("=")[0]: i.split("=")[1] for i in expected_data["text"].split(";")}
@@ -327,13 +325,9 @@ class Assertions:
                         i = re.findall("[[](.*?)[]]", key, re.I | re.M)[0]
                         finally_key = key.split(".")[-1]
                         realdata = self.find(finally_key, c[int(i)])
-                        # self.log.info(f"{key}预期值: {value}")
-                        # self.log.info(f"{key}实际返回值: {realdata}")
                         assert str(realdata).replace(" ", "") == str(value).replace(" ", "")
-                        # self.log.info(f"{key}断言成功")
                         self.log.info("mysql 断言 -> 断言成功")
-                        # self.log.info("--------------------------------------------------------")
-                # self.log.info("断言成功,进入下一个步骤")
+
                 return True
             except AssertionError:
                 self.log.error("expected_data is %s" % (expected_data))
