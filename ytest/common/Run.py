@@ -41,11 +41,7 @@ def multi_process_run(project, ytest_folder=None, conf=None):
     now_date = ytest_time._dateTime()
     name = f"{project_name}_{str(int(time.time()))}"
     # 假设 db.insert_report() 生成了报告ID
-    report_id = str(
-        ytest_db.insert_report(
-            name, project_name, conf, now_date, passed=0, failed=0, skipped=0, error=0
-        )
-    )
+    report_id = str(ytest_db.insert_report(name, project_name, conf, now_date, passed=0, failed=0, skipped=0, error=0))
     POOL_SIZE = 3  # 设置最大并发进程数
     with Pool(POOL_SIZE) as pool:
         pool.map(partial(run, conf=conf, date=now_date, report_id=report_id), case_list)
@@ -60,18 +56,15 @@ def multi_process_run(project, ytest_folder=None, conf=None):
     cmd = f"allure generate {xml_path} -o {html_path}"
     shell.invoke(cmd)
     failed = ytest_db.fetch_api_detail(report_id)
+    all_api = ytest_db.fetch_api_all(report_id)
+    passed = ytest_db.fetch_api_pass_all(report_id)
+
     if int(failed) > 0:
         ytest_db.update_report(report_id, failed)
-        if int(
-            now_case_conf.get_conf("qywx", "Enable")
-        ) == 1 and now_case_conf.get_conf("qywx", "webhook_url"):
-            send_message.qywx(
-                now_case_conf.get_conf("qywx", "webhook_url"), failed, _conf
-            )
+        if int(now_case_conf.get_conf("qywx", "Enable")) == 1 and now_case_conf.get_conf("qywx", "webhook_url"):
+            send_message.qywx(now_case_conf.get_conf("qywx", "webhook_url"), all_api, passed, failed, _conf)
     if shell.check_port_with_lsof:
-        open_allure = (
-            f"lsof -ti :8080 | xargs kill -9 && allure open {html_path} --port 8080"
-        )
+        open_allure = f"lsof -ti :8080 | xargs kill -9 && allure open {html_path} --port 8080"
     else:
         open_allure = f"allure open {html_path} --port 8080"
     shell.invoke(open_allure)

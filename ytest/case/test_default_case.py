@@ -39,13 +39,9 @@ class TestSuite(object):
     def setup(self, request):
         # 在每个测试用例开始前执行的方法
         # 判断用例是否需要执行,对需要执行的用例进行函数和sql相关的初始化操作
-        is_run = request.node.get_closest_marker("parametrize").args[1][
-            request.node.callspec.indices["case"]
-        ]["is_run"]
+        is_run = request.node.get_closest_marker("parametrize").args[1][request.node.callspec.indices["case"]]["is_run"]
         if is_run == "是":
-            setup_data = request.node.get_closest_marker("parametrize").args[1][
-                request.node.callspec.indices["case"]
-            ]["setup"]
+            setup_data = request.node.get_closest_marker("parametrize").args[1][request.node.callspec.indices["case"]]["setup"]
             allure.attach("{}".format(setup_data), "前置步骤处理结果")
             setupteardown.func_run(args.filename, setup_data, TestSuite.global_variable)
             setupteardown.sql_run(
@@ -62,13 +58,9 @@ class TestSuite(object):
         # 对用例执行完成后进行后置处理,如执行一些sql,或者一些以response为参数的函数处理
         yield
         if hasattr(self, "response"):
-            teardown_data = request.node.get_closest_marker("parametrize").args[1][
-                request.node.callspec.indices["case"]
-            ]["teardown"]
+            teardown_data = request.node.get_closest_marker("parametrize").args[1][request.node.callspec.indices["case"]]["teardown"]
             allure.attach("{}".format(teardown_data), "后置步骤处理结果")
-            setupteardown.func_run(
-                args.filename, teardown_data, TestSuite.global_variable
-            )
+            setupteardown.func_run(args.filename, teardown_data, TestSuite.global_variable)
             setupteardown.sql_run(
                 teardown_data,
                 TestSuite.case_detail["project"],
@@ -78,9 +70,7 @@ class TestSuite(object):
 
     @allure.suite(case_name)
     @allure.epic(case_name)
-    @pytest.mark.parametrize(
-        "case", case_list, ids=[case["case_id"] for case in case_list]
-    )
+    @pytest.mark.parametrize("case", case_list, ids=[case["case_id"] for case in case_list])
     def test_case(self, case):
         (
             case_id,
@@ -108,6 +98,7 @@ class TestSuite(object):
         allure.dynamic.title(_title)
         allure.attach("{}".format(level), "用例等级")
         allure.attach("{}".format(model), "所属模块")
+        allure.attach("{}".format(TestSuite.global_variable), "全局变量")
         # 对部分含变量的参数初始化
         param = hook_variable.resolve_vars(param, TestSuite.global_variable)
         body = hook_variable.resolve_vars(body, TestSuite.global_variable)
@@ -129,9 +120,7 @@ class TestSuite(object):
             request_type=method,
         )
         log.info("步骤结束 <- 请求成功,返回response")
-        self._assert = Assertions(
-            TestSuite.case_detail["project"], args.conf, TestSuite.global_variable
-        )
+        self._assert = Assertions(TestSuite.case_detail["project"], args.conf, TestSuite.global_variable, args.filename)
         allure.attach("{}".format(expected_data), "用例断言")
         # 结果断言
         assert self._assert.assert_method(self.response, expected_data)
@@ -143,9 +132,7 @@ if __name__ == "__main__":
     # 运行测试用例
     if args.type == "debug":
         # 生成路径，兼容 Linux 和 Windows
-        debug_report_path = os.path.join(
-            "report", TestSuite.project, args.conf, "debug"
-        )
+        debug_report_path = os.path.join("report", TestSuite.project, args.conf, "debug")
         file_operate.default_folder(debug_report_path)
 
         pytest.main(
@@ -163,9 +150,7 @@ if __name__ == "__main__":
         )
     elif args.date:
         # 生成路径，兼容 Linux 和 Windows
-        date_report_path = os.path.join(
-            "report", TestSuite.project, args.conf, args.date, args.report_id, "xml"
-        )
+        date_report_path = os.path.join("report", TestSuite.project, args.conf, args.date, args.report_id, "xml")
 
         pytest.main(
             [
@@ -187,9 +172,7 @@ if __name__ == "__main__":
         )
     else:
         # 生成路径，兼容 Linux 和 Windows
-        default_report_path = os.path.join(
-            "report", TestSuite.project, args.conf, TestSuite.run_case_time, "xml"
-        )
+        default_report_path = os.path.join("report", TestSuite.project, args.conf, TestSuite.run_case_time, "xml")
 
         pytest.main(
             [

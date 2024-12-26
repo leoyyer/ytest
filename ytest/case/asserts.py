@@ -14,11 +14,12 @@ import string, jsonpath, re
 
 
 class Assertions:
-    def __init__(self, project, env, global_variable):
+    def __init__(self, project, env, global_variable, excel):
         self.log = logger
         self.project = project
         self.env = env
         self.global_variable = global_variable
+        self.excel = excel
 
     def assert_method(self, data, expected_data_list):
         # 断言参数处理
@@ -225,7 +226,7 @@ class Assertions:
                     func_list = re.findall(r"(?<=\$\{)(.*)(?=\()", expected_data["func"])
                     _func_arg = expected_data["func"].split("(")[1].split(")")[0]
                     func_arg = string.Template(_func_arg).substitute(self.global_variable)
-                    hook_list = hook_variable.get_hook_name()
+                    hook_list = hook_variable.get_hook_name(self.excel)
                     if func_arg:
                         kwargs = dict(l.replace(" ", "").split("=", 1) for l in func_arg.split(","))
                         value = hook_variable.get_hook_variable(hook_list, func_list[0], **kwargs)
@@ -282,7 +283,7 @@ class Assertions:
                     func_list = re.findall(r"(?<=\$\{)(.*)(?=\()", expected_data["func"])
                     _func_arg = expected_data["func"].split("(")[1].split(")")[0]
                     func_arg = string.Template(_func_arg).substitute(self.global_variable)
-                    hook_list = hook_variable.get_hook_name()
+                    hook_list = hook_variable.get_hook_name(self.excel)
                     if func_arg:
                         kwargs = dict(l.replace(" ", "").split("=", 1) for l in func_arg.split(","))
                         value = hook_variable.get_hook_variable(hook_list, func_list[0], **kwargs)
