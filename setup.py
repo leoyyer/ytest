@@ -70,6 +70,7 @@ setup(
         "openpyxl==3.1.5",
         "pytest-rerunfailures==9.1.1",
         "icecream==2.1.3",
+        "cryptography==44.0.0",
     ],
     entry_points={
         "console_scripts": [
