@@ -66,9 +66,7 @@ class YtestDatabase:
         )
         self.conn.commit()
 
-    def insert_report(
-        self, name, project, type, run_time, passed=0, failed=0, skipped=0, error=0
-    ):
+    def insert_report(self, name, project, type, run_time, passed=0, failed=0, skipped=0, error=0):
         """插入数据到 report 表"""
         created_at = self._get_beijing_time()
         updated_at = created_at
@@ -93,9 +91,7 @@ class YtestDatabase:
         self.conn.commit()
         return self.cursor.lastrowid  # 返回最后插入的 report_id
 
-    def insert_api_detail(
-        self, report_id, name, passed=0, failed=0, skipped=0, error=0
-    ):
+    def insert_api_detail(self, report_id, name, passed=0, failed=0, skipped=0, error=0):
         """插入数据到 api_detail 表"""
         created_at = self._get_beijing_time()
         updated_at = created_at
@@ -110,24 +106,30 @@ class YtestDatabase:
 
     def fetch_failed_reports(self, report_id):
         """查询 最新的report是否存在fail数据"""
-        self.cursor.execute(
-            "SELECT failed FROM report WHERE report_id = ?", (report_id,)
-        )
+        self.cursor.execute("SELECT failed FROM report WHERE report_id = ?", (report_id,))
         result = self.cursor.fetchone()  # 使用 fetchone 获取单个值
         return result[0] if result and result[0] is not None else 0  # 处理 None 的情况
 
     def fetch_api_details_by_report(self, report_id):
         """根据 report_id 查询 api_detail 数据"""
-        self.cursor.execute(
-            "SELECT * FROM api_detail WHERE report_id = ?", (report_id,)
-        )
+        self.cursor.execute("SELECT * FROM api_detail WHERE report_id = ?", (report_id,))
         return self.cursor.fetchall()
 
     def fetch_api_detail(self, report_id):
         """根据 report_id 查询 api_detail 表中的 sum(failed) 值"""
-        self.cursor.execute(
-            "SELECT sum(failed) FROM api_detail WHERE report_id = ?", (report_id,)
-        )
+        self.cursor.execute("SELECT sum(failed) FROM api_detail WHERE report_id = ?", (report_id,))
+        result = self.cursor.fetchone()  # 使用 fetchone 获取单个值
+        return result[0] if result and result[0] is not None else 0  # 处理 None 的情况
+
+    def fetch_api_all(self, report_id):
+        """根据 report_id 查询 api_detail 表中的所有值"""
+        self.cursor.execute("SELECT count(1) FROM api_detail WHERE report_id = ?", (report_id,))
+        result = self.cursor.fetchone()  # 使用 fetchone 获取单个值
+        return result[0] if result and result[0] is not None else 0  # 处理 None 的情况
+
+    def fetch_api_pass_all(self, report_id):
+        """根据 report_id 查询 api_detail 表中的所有值"""
+        self.cursor.execute("SELECT count(1) FROM api_detail WHERE report_id = ? and passed > 0 ", (report_id,))
         result = self.cursor.fetchone()  # 使用 fetchone 获取单个值
         return result[0] if result and result[0] is not None else 0  # 处理 None 的情况
 
@@ -146,9 +148,7 @@ class YtestDatabase:
             self.conn.commit()  # 提交更改
             if self.cursor.rowcount != 0:
                 # 额外调试：检查是否更新成功
-                self.cursor.execute(
-                    "SELECT failed FROM report WHERE id = ?", (report_id,)
-                )
+                self.cursor.execute("SELECT failed FROM report WHERE id = ?", (report_id,))
             return self.cursor.rowcount
         except Exception as e:
             self.conn.rollback()  # 如果有异常，回滚事务

@@ -41,19 +41,12 @@ class SetupTearDown:
                         # 替换参数中的变量名为实际值
                         func_arg = string.Template(func_arg).substitute(global_variable)
                         # 解析参数列表
-                        kwargs = dict(
-                            l.replace(" ", "").split("=", 1)
-                            for l in func_arg.split(",")
-                        )
+                        kwargs = dict(l.replace(" ", "").split("=", 1) for l in func_arg.split(","))
                         # 调用钩子函数并获取返回值
-                        result = hook_variable.get_hook_variable(
-                            hook_list, func_list[0], **kwargs
-                        )
+                        result = hook_variable.get_hook_variable(hook_list, func_list[0], **kwargs)
                     else:
                         # 调用钩子函数并获取返回值
-                        result = hook_variable.get_hook_variable(
-                            hook_list, func_list[0]
-                        )
+                        result = hook_variable.get_hook_variable(hook_list, func_list[0])
                     if "key" in func:
                         global_variable.update({func["key"]: result})
 
@@ -83,9 +76,7 @@ class SetupTearDown:
             raise ValueError("无效的响应体")
         if len(extract_param):
             for extract in extract_param:
-                _extract = {
-                    i.split("=")[0]: i.split("=")[1] for i in extract.split(";")
-                }
+                _extract = {i.split("=")[0]: i.split("=")[1] for i in extract.split(";")}
                 value = next(iter(_extract.values()))
                 res = jsonpath.jsonpath(response, f"$.{value}")
                 global_variable.update({next(iter(_extract.keys())): res[0]})
