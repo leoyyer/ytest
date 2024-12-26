@@ -33,6 +33,7 @@ class TestSuite(object):
     case_list = case_detail["case_list"]
     env = conf_path.conf_path
     global_variable = case_detail["base"]["global_variable"]
+    sql_list = case_detail["base"]["sql_list"]
     run_case_time = ytest_time._time()
 
     @pytest.fixture(autouse=True)
@@ -46,6 +47,7 @@ class TestSuite(object):
             setupteardown.func_run(args.filename, setup_data, TestSuite.global_variable)
             setupteardown.sql_run(
                 setup_data,
+                TestSuite.sql_list,
                 TestSuite.case_detail["project"],
                 args.conf,
                 TestSuite.global_variable,
@@ -63,6 +65,7 @@ class TestSuite(object):
             setupteardown.func_run(args.filename, teardown_data, TestSuite.global_variable)
             setupteardown.sql_run(
                 teardown_data,
+                TestSuite.sql_list,
                 TestSuite.case_detail["project"],
                 args.conf,
                 TestSuite.global_variable,

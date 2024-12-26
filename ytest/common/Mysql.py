@@ -74,9 +74,7 @@ class MysqlDb:
         db_conf = DB_CONF
         try:
             # 创建数据库连接
-            self.conn = pymysql.connect(
-                **db_conf, autocommit=True, connect_timeout=time_out
-            )
+            self.conn = pymysql.connect(**db_conf, autocommit=True, connect_timeout=time_out)
             # 创建游标对象，结果以字典格式返回
             self.cur = self.conn.cursor(cursor=DictCursor)
         except Exception as e:

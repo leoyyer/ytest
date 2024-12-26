@@ -51,7 +51,7 @@ class Assertions:
 
             # 检查类型并执行断言
             if assert_type in assertion_map:
-                self.log.info(f"进入断言 -> ({assert_type})")
+                self.log.info(f"进入断言,断言类型:({assert_type})")
                 try:
                     if assert_type in ["response_code", "time"]:
                         # 特殊处理一些需要单独参数的类型
@@ -202,7 +202,7 @@ class Assertions:
                 if "len" in expected_data:
                     self.log.info("预期值: {0}, 实际返回值: {1}".format(expected_data["len"], len(res[0])))
                     assert len(res[0]) == int(expected_data["len"])
-                    self.log.info("assert_body 断言 -> 断言成功")
+                    self.log.info("length_equals 断言 -> 断言成功")
                     return True
                 elif "database" in expected_data:
                     _sql = hook_variable.resolve_vars(expected_data["sql"], self.global_variable)
@@ -258,7 +258,7 @@ class Assertions:
                 if "len" in expected_data:
                     self.log.info("预期值: {0}, 实际返回值: {1}".format(expected_data["len"], len(res[0])))
                     assert len(res[0]) > int(expected_data["len"])
-                    self.log.info("assert_body 断言 -> 断言成功")
+                    self.log.info("length_equals_greater 断言 -> 断言成功")
                     return True
 
                 elif "database" in expected_data:
@@ -326,7 +326,7 @@ class Assertions:
                         finally_key = key.split(".")[-1]
                         realdata = self.find(finally_key, c[int(i)])
                         assert str(realdata).replace(" ", "") == str(value).replace(" ", "")
-                        self.log.info("mysql 断言 -> 断言成功")
+                        self.log.info("assert_sql 断言 -> 断言成功")
 
                 return True
             except AssertionError:

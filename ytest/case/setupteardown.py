@@ -50,7 +50,7 @@ class SetupTearDown:
                     if "key" in func:
                         global_variable.update({func["key"]: result})
 
-    def sql_run(self, sql_list, product, env, global_variable):
+    def sql_run(self, case_data, sql_list, product, env, global_variable):
         """
         执行sql语句,暂时只支持mysql
         Args:
@@ -59,8 +59,15 @@ class SetupTearDown:
             env (str): 读取的sql配置信息文件
             global_variable (dict): 全局变量表
         """
-        if len(sql_list) > 0:
-            for sql in sql_list:
+        now_case_list = case_data[0]["sql_list"]
+        _now_case_list = []
+        for i in now_case_list:
+            for s in sql_list:
+                if i in s:
+                    _now_case_list.append(s[i])
+                    break
+        if len(_now_case_list) > 0:
+            for sql in _now_case_list:
                 if sql["type"] == "mysql":
                     _sql = string.Template(sql["sql"]).substitute(global_variable)
                     DB = MysqlDb(sql["database"], product, env)
