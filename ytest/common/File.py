@@ -52,11 +52,7 @@ class Flile:
 
     def get_file_path(self, folder, file=None):
         # 返回指定的文件夹包含的文件或文件夹的名字的列表
-        ini_files = [
-            f
-            for f in os.listdir(folder)
-            if os.path.isfile(os.path.join(folder, f)) and f.endswith(".ini")
-        ]
+        ini_files = [f for f in os.listdir(folder) if os.path.isfile(os.path.join(folder, f)) and f.endswith(".ini")]
         if not ini_files:
             raise FileNotFoundError(f"{folder} 下,ini 配置文件不存在,请检查")
         if file is None:
@@ -64,11 +60,7 @@ class Flile:
             case_list = []
             for root, dirs, files in os.walk(folder):
                 for name in files:
-                    if (
-                        name.endswith(".xlsx")
-                        and "_stop" not in name
-                        and "._" not in name
-                    ):
+                    if name.endswith(".xlsx") and "_stop" not in name and "._" not in name:
                         case_list.append(os.path.join(root, name))
         else:
             # 判断路径是否存在
@@ -79,11 +71,7 @@ class Flile:
             case_list = []
             for root, dirs, files in os.walk(path):
                 for name in files:
-                    if (
-                        name.endswith(".xlsx")
-                        and "_stop" not in name
-                        and "._" not in name
-                    ):
+                    if name.endswith(".xlsx") and "_stop" not in name and "._" not in name:
                         case_list.append(os.path.join(root, name))
         if len(case_list):
             return case_list
@@ -97,6 +85,42 @@ class Flile:
         except FileNotFoundError:
             # 如果目录不存在，则创建它
             os.makedirs(directory_path)
+
+    def create_nested_directory(self, target_path):
+        """
+        递归遍历文件夹，从下往上检查路径是否存在，直到找到存在的父级路径。
+        然后逐层创建目录，使最终路径有效。
+
+        Args:
+            target_path (str): 目标路径，比如 "report/fast/test/20241227/64/xml"
+        """
+        # 如果目标路径已经存在，则直接返回
+        if os.path.exists(target_path):
+            return
+
+        # 获取目标路径的父级目录
+        parent_path = os.path.dirname(target_path)
+
+        # 如果父级目录不存在，则递归调用自身
+        if not os.path.exists(parent_path):
+            self.create_nested_directory(parent_path)
+
+        # 当父级目录存在后，创建当前目标路径
+        os.mkdir(target_path)
+        print(f"Created directory: {target_path}")
+
+    def ensure_directory_exists(self, path):
+        """确保目录存在"""
+        if not os.path.exists(path):
+            os.makedirs(path)
+
+    def get_report_paths(self, project_name, conf, now_date, report_id):
+        """生成报告相关路径"""
+        base_path = os.path.join("report", project_name, conf, now_date, report_id)
+        xml_path = os.path.join(base_path, "xml")
+        html_path = os.path.join(base_path, "html")
+        self.ensure_directory_exists(xml_path)
+        return xml_path, html_path
 
 
 file_operate = Flile()

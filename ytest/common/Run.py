@@ -29,45 +29,53 @@ def multi_process_run(project, ytest_folder=None, conf=None):
     # 使用 os.path.normpath 规范化路径
     project_path = os.path.normpath(project)
     case_list = file_operate.get_file_path(project_path, ytest_folder)
+
     if conf:
-        _conf = conf if conf is not None else "conf"
+        conf_name = conf if conf else "conf"
         # 验证 conf.ini 文件是否存在
-        file_operate.find_file(project_path, f"{_conf}.ini")
+        file_operate.find_file(project_path, f"{conf_name}.ini")
 
     # 获取项目名称，兼容 Windows 和 Linux
     project_name = os.path.basename(project_path)
-    now_case_conf = ConfigFile(project_name, _conf)
+    now_case_conf = ConfigFile(project_name, conf_name)
+
     # 生成测试报告文件夹
     now_date = ytest_time._dateTime()
-    name = f"{project_name}_{str(int(time.time()))}"
-    # 假设 db.insert_report() 生成了报告ID
-    report_id = str(ytest_db.insert_report(name, project_name, conf, now_date, passed=0, failed=0, skipped=0, error=0))
+    report_name = f"{project_name}_{int(time.time())}"
+    report_id = str(ytest_db.insert_report(report_name, project_name, conf, now_date, passed=0, failed=0, skipped=0, error=0))
+
+    # 获取报告路径
+    xml_path, html_path = file_operate.get_report_paths(project_name, conf_name, now_date, report_id)
+    yallure.add_environment(project_name, xml_path)
+    yallure.add_categories(xml_path)
+
     POOL_SIZE = 3  # 设置最大并发进程数
     with Pool(POOL_SIZE) as pool:
         pool.map(partial(run, conf=conf, date=now_date, report_id=report_id), case_list)
 
-    # 拼接 Allure 报告生成路径，兼容 Linux 和 Windows
-    xml_path = os.path.join("report", project_name, conf, now_date, report_id, "xml")
-    html_path = os.path.join("report", project_name, conf, now_date, report_id, "html")
-    env_path = os.path.join("report", project_name, conf, now_date, report_id)
-    yallure.add_environment(project_name, env_path)
-    yallure.add_categories(env_path)
     # 生成 Allure 报告的 Shell 命令
     cmd = f"allure generate {xml_path} -o {html_path}"
     shell.invoke(cmd)
+
+    # 获取测试结果
     failed = ytest_db.fetch_api_detail(report_id)
     all_api = ytest_db.fetch_api_all(report_id)
     passed = ytest_db.fetch_api_pass_all(report_id)
 
     if int(failed) > 0:
         ytest_db.update_report(report_id, failed)
+        # 发送消息
         if int(now_case_conf.get_conf("qywx", "Enable")) == 1 and now_case_conf.get_conf("qywx", "webhook_url"):
-            send_message.qywx(now_case_conf.get_conf("qywx", "webhook_url"), all_api, passed, failed, _conf)
-    if shell.check_port_with_lsof:
-        open_allure = f"lsof -ti :8080 | xargs kill -9 && allure open {html_path} --port 8080"
-    else:
-        open_allure = f"allure open {html_path} --port 8080"
-    shell.invoke(open_allure)
+            send_message.qywx(now_case_conf.get_conf("qywx", "webhook_url"), all_api, passed, failed, conf_name)
+
+    # 打开 Allure 报告
+    open_allure_cmd = (
+        f"lsof -ti :5050 | xargs kill -9 && allure serve {html_path} --host 0.0.0.0 --port 5050"
+        if shell.check_port_with_lsof(5050)
+        else f"allure serve {html_path} --host 0.0.0.0 --port 5050"
+    )
+
+    shell.invoke(open_allure_cmd)
 
 
 def run(filename, conf, run_type=None, date=None, report_id=None):
