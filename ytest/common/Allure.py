@@ -104,6 +104,7 @@ class Allure:
         Args:
             path ([type]): [description]
         """
+        print("---------", path)
         conf = ConfigFile(project=project)
         template_path = os.path.join(config.ytest_path, "ytest", "templates")
         env = Environment(loader=FileSystemLoader(template_path))
@@ -168,22 +169,14 @@ class Allure:
         Returns:
             dict: 合并后的 history-trend.json 数据
         """
-        now_trend_path = os.path.join(
-            base_path, current_timestamp, "html", "widgets", "history-trend.json"
-        )
+        now_trend_path = os.path.join(base_path, current_timestamp, "html", "widgets", "history-trend.json")
         with open(now_trend_path, "r", encoding="utf-8") as file:
             now_trend_data = json.load(file)
-            now_trend_data[0]["buildOrder"] = ytest_time.convert_to_month_day(
-                current_timestamp
-            )
-        current_history_trend = {
-            "items": now_trend_data
-        }  # 初始化为最新报告中的执行情况
+            now_trend_data[0]["buildOrder"] = ytest_time.convert_to_month_day(current_timestamp)
+        current_history_trend = {"items": now_trend_data}  # 初始化为最新报告中的执行情况
         # 遍历时间戳文件夹列表
         for timestamp_folder in timestamp_folders:
-            history_trend_path = os.path.join(
-                base_path, timestamp_folder, "html", "widgets", "history-trend.json"
-            )
+            history_trend_path = os.path.join(base_path, timestamp_folder, "html", "widgets", "history-trend.json")
             # 判断文件是否存在
             if not os.path.exists(history_trend_path):
                 continue
@@ -198,18 +191,12 @@ class Allure:
                         # 逐个添加列表中的字典元素
                         for item in history_trend_data:
                             if isinstance(item, dict):
-                                item["buildOrder"] = ytest_time.convert_to_month_day(
-                                    timestamp_folder
-                                )
+                                item["buildOrder"] = ytest_time.convert_to_month_day(timestamp_folder)
                                 current_history_trend["items"].append(item)
                             else:
-                                print(
-                                    f"Warning: history-trend.json in {timestamp_folder} contains invalid data."
-                                )
+                                print(f"Warning: history-trend.json in {timestamp_folder} contains invalid data.")
                     else:
-                        print(
-                            f"Warning: history-trend.json in {timestamp_folder} is not a list."
-                        )
+                        print(f"Warning: history-trend.json in {timestamp_folder} is not a list.")
 
         return current_history_trend
 
@@ -221,9 +208,7 @@ class Allure:
             base_path (_type_): 报告路径
             timestamp_folder (_type_): 最新的报告时间戳
         """
-        file_path = os.path.join(
-            base_path, timestamp_folder, "html", "widgets", "history-trend.json"
-        )
+        file_path = os.path.join(base_path, timestamp_folder, "html", "widgets", "history-trend.json")
         # 将新的字典转换成 JSON 格式
         json_data = json.dumps(
             data["items"],
@@ -235,12 +220,8 @@ class Allure:
             file.write(json_data)
 
     def add_history_trend(self, base_path, current_timestamp):
-        timestamp_folders = self.get_previous_timestamp_folders(
-            base_path, current_timestamp
-        )
-        merged_history_trend = self.merge_history_trend(
-            base_path, current_timestamp, timestamp_folders
-        )
+        timestamp_folders = self.get_previous_timestamp_folders(base_path, current_timestamp)
+        merged_history_trend = self.merge_history_trend(base_path, current_timestamp, timestamp_folders)
         self.write_history_trend(merged_history_trend, base_path, current_timestamp)
 
 

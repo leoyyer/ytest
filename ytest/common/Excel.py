@@ -387,6 +387,6 @@ class ReadXlsData:
 
 
 if __name__ == "__main__":
-    excel = ReadXlsData("excel用例的绝对路径")
+    excel = ReadXlsData("case/fast/suite/应用分析-概览.xlsx")
     case = excel.get_case_data()
     print(case)
