@@ -12,7 +12,6 @@ import json, os, allure
 from jinja2 import Environment, FileSystemLoader
 from ytest.config.ConfFile import ConfigFile
 from ytest.conf import config
-from ytest.common.Time import ytest_time
 
 
 CATEGORIES = [
@@ -104,7 +103,6 @@ class Allure:
         Args:
             path ([type]): [description]
         """
-        print("---------", path)
         conf = ConfigFile(project=project)
         template_path = os.path.join(config.ytest_path, "ytest", "templates")
         env = Environment(loader=FileSystemLoader(template_path))
@@ -138,25 +136,37 @@ class Allure:
 
     def get_previous_timestamp_folders(self, base_path, current_timestamp):
         """
-        获取基于当前时间戳之前的最多1个时间戳文件夹名(默认取上一个)
+        获取基于当前时间戳之前的最多5个时间戳文件夹名（按日期倒序排序，日期相同则按_id排序）
         Args:
             base_path (str): 基础路径
-            current_timestamp (str): 当前时间戳
+            current_timestamp (str): 当前时间戳（格式：YYYYMMDD_reportId）
         Returns:
             list: 时间戳文件夹名列表
         """
         timestamp_folders = []
-        # 遍历基础路径下的文件夹,根据时间戳从大到小排序
-        for folder_name in sorted(os.listdir(base_path), reverse=True):
-            # 如果文件夹名不是时间戳，则跳过
-            if not folder_name.isdigit():
-                continue
-            # 如果文件夹名小于当前时间戳，则加入列表
-            if folder_name < current_timestamp:
-                timestamp_folders.append(folder_name)
-                # 如果列表长度已达到1个，则退出循环
-                if len(timestamp_folders) == 1:
-                    break
+        # 提取当前时间戳中的日期和报告 ID
+        current_date = current_timestamp.split("_")[0]
+        current_report_id = current_timestamp.split("_")[1]
+        # 获取 base_path 下所有文件夹
+        all_folders = os.listdir(base_path)
+        # 遍历文件夹
+        for folder_name in all_folders:
+            folder_path = os.path.join(base_path, folder_name)
+            # 确保是目录，并且文件夹名符合 {YYYYMMDD_report_id} 的格式
+            if os.path.isdir(folder_path) and "_" in folder_name:
+                date_part, report_id = folder_name.split("_")
+                # 如果日期部分是数字，表示有效的日期
+                if date_part.isdigit() and len(date_part) == 8:
+                    # 如果文件夹与当前时间戳相同，跳过
+                    if date_part == current_date and report_id == current_report_id:
+                        continue
+
+                    # 如果文件夹的日期小于当前时间戳，则加入列表
+                    timestamp_folders.append((folder_name, date_part, report_id))
+        # 按照日期倒序排序，如果日期相同则按照 report_id 排序
+        timestamp_folders.sort(key=lambda x: (x[1], x[2]), reverse=True)
+        # 只返回最多5个文件夹的名称
+        timestamp_folders = [folder[0] for folder in timestamp_folders[:5]]
         return timestamp_folders
 
     def merge_history_trend(self, base_path, current_timestamp, timestamp_folders):
@@ -172,11 +182,11 @@ class Allure:
         now_trend_path = os.path.join(base_path, current_timestamp, "allure-report", "widgets", "history-trend.json")
         with open(now_trend_path, "r", encoding="utf-8") as file:
             now_trend_data = json.load(file)
-            now_trend_data[0]["buildOrder"] = ytest_time.convert_to_month_day(current_timestamp)
+            now_trend_data[0]["buildOrder"] = current_timestamp
         current_history_trend = {"items": now_trend_data}  # 初始化为最新报告中的执行情况
         # 遍历时间戳文件夹列表
         for timestamp_folder in timestamp_folders:
-            history_trend_path = os.path.join(base_path, timestamp_folder, "html", "widgets", "history-trend.json")
+            history_trend_path = os.path.join(base_path, timestamp_folder, "allure-report", "widgets", "history-trend.json")
             # 判断文件是否存在
             if not os.path.exists(history_trend_path):
                 continue
@@ -191,13 +201,12 @@ class Allure:
                         # 逐个添加列表中的字典元素
                         for item in history_trend_data:
                             if isinstance(item, dict):
-                                item["buildOrder"] = ytest_time.convert_to_month_day(timestamp_folder)
+                                item["buildOrder"] = timestamp_folder
                                 current_history_trend["items"].append(item)
                             else:
                                 print(f"Warning: history-trend.json in {timestamp_folder} contains invalid data.")
                     else:
                         print(f"Warning: history-trend.json in {timestamp_folder} is not a list.")
-
         return current_history_trend
 
     def write_history_trend(self, data, base_path, timestamp_folder):
@@ -208,7 +217,7 @@ class Allure:
             base_path (_type_): 报告路径
             timestamp_folder (_type_): 最新的报告时间戳
         """
-        file_path = os.path.join(base_path, timestamp_folder, "html", "widgets", "history-trend.json")
+        file_path = os.path.join(base_path, timestamp_folder, "allure-report", "widgets", "history-trend.json")
         # 将新的字典转换成 JSON 格式
         json_data = json.dumps(
             data["items"],
@@ -226,7 +235,3 @@ class Allure:
 
 
 yallure = Allure()
-
-if __name__ == "__main__":
-    # yallure.add_environment("fast", "report/fast/test")
-    yallure.add_history_trend("report/fast/test/20241231", "91")
