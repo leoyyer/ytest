@@ -45,16 +45,16 @@ def multi_process_run(project, ytest_folder=None, conf=None):
     report_id = str(ytest_db.insert_report(report_name, project_name, conf, now_date, passed=0, failed=0, skipped=0, error=0))
 
     # 获取报告路径
-    xml_path, html_path = file_operate.get_report_paths(project_name, conf_name, now_date, report_id)
-    yallure.add_environment(project_name, xml_path)
-    yallure.add_categories(xml_path)
+    report_path, report_html_path = file_operate.get_report_paths(project_name, conf_name, now_date, report_id)
+    yallure.add_environment(project_name, report_path)
+    yallure.add_categories(report_path)
 
     POOL_SIZE = 3  # 设置最大并发进程数
     with Pool(POOL_SIZE) as pool:
         pool.map(partial(run, conf=conf, date=now_date, report_id=report_id), case_list)
 
     # 生成 Allure 报告的 Shell 命令
-    cmd = f"allure generate {xml_path} -o {html_path}"
+    cmd = f"allure generate {report_path} -o {report_html_path}"
     shell.invoke(cmd)
 
     # 获取测试结果
@@ -70,9 +70,9 @@ def multi_process_run(project, ytest_folder=None, conf=None):
 
     # 打开 Allure 报告
     open_allure_cmd = (
-        f"lsof -ti :5050 | xargs kill -9 && allure serve {html_path} --host 0.0.0.0 --port 5050"
+        f"lsof -ti :5050 | xargs kill -9 && allure serve {report_path} --host 0.0.0.0 --port 5050"
         if shell.check_port_with_lsof(5050)
-        else f"allure serve {html_path} --host 0.0.0.0 --port 5050"
+        else f"allure serve {report_path} --host 0.0.0.0 --port 5050"
     )
 
     shell.invoke(open_allure_cmd)

@@ -116,9 +116,9 @@ class Flile:
 
     def get_report_paths(self, project_name, conf, now_date, report_id):
         """生成报告相关路径"""
-        base_path = os.path.join("report", project_name, conf, now_date, report_id)
-        xml_path = os.path.join(base_path, "xml")
-        html_path = os.path.join(base_path, "html")
+        base_path = os.path.join("report", project_name, conf, str(f"{now_date}_{report_id}"))
+        xml_path = os.path.join(base_path, "allure-results")
+        html_path = os.path.join(base_path, "allure-report")
         self.ensure_directory_exists(xml_path)
         return xml_path, html_path
 
