@@ -165,8 +165,8 @@ class Allure:
                     timestamp_folders.append((folder_name, date_part, report_id))
         # 按照日期倒序排序，如果日期相同则按照 report_id 排序
         timestamp_folders.sort(key=lambda x: (x[1], x[2]), reverse=True)
-        # 只返回最多5个文件夹的名称
-        timestamp_folders = [folder[0] for folder in timestamp_folders[:5]]
+        # 只返回最多7个文件夹的名称
+        timestamp_folders = [folder[0] for folder in timestamp_folders[:7]]
         return timestamp_folders
 
     def merge_history_trend(self, base_path, current_timestamp, timestamp_folders):
