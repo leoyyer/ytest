@@ -169,7 +169,7 @@ class Allure:
         Returns:
             dict: 合并后的 history-trend.json 数据
         """
-        now_trend_path = os.path.join(base_path, current_timestamp, "html", "widgets", "history-trend.json")
+        now_trend_path = os.path.join(base_path, current_timestamp, "allure-report", "widgets", "history-trend.json")
         with open(now_trend_path, "r", encoding="utf-8") as file:
             now_trend_data = json.load(file)
             now_trend_data[0]["buildOrder"] = ytest_time.convert_to_month_day(current_timestamp)
@@ -228,5 +228,5 @@ class Allure:
 yallure = Allure()
 
 if __name__ == "__main__":
-    yallure.add_environment("demo", "report/demo/default")
-    yallure.add_history_trend("report/demo/default", "20240307175354")
+    # yallure.add_environment("fast", "report/fast/test")
+    yallure.add_history_trend("report/fast/test/20241231", "91")

@@ -56,15 +56,10 @@ def pytest_sessionfinish(session, exitstatus):
         normalized_path = os.path.normpath(report_dir)
         values = normalized_path.split(os.sep)
         # 提取项目名、配置名、运行时间和报告ID
-        project, conf, run_case_time, report_id = (
-            values[1],
-            values[2],
-            values[3],
-            values[4] if len(values) > 4 else None,
-        )
+        project, conf, run_case_time = (values[1], values[2], values[3])
         if run_case_time in ["debug"]:
-            xml_path = os.path.join("report", project, conf, run_case_time, "xml")
-            html_path = os.path.join("report", project, conf, run_case_time, "html")
+            xml_path = os.path.join("report", project, conf, run_case_time, "allure-results")
+            html_path = os.path.join("report", project, conf, run_case_time, "allure-report")
             clear_path = os.path.join("report", project, conf, run_case_time)
             cmd = f"allure generate {xml_path} -o {html_path} --clear {clear_path}"
             shell.invoke(cmd)
@@ -173,8 +168,8 @@ def pytest_terminal_summary(config):
     run_type = normalized_path.split(os.sep)[-2]
     if run_type not in ["debug"]:
         parts = normalized_path.split(os.sep)
-        # 匹配最后一个由纯数字组成的部分
-        report_id = next((part for part in reversed(parts) if part.isdigit()), None)
+        # 匹配最后一个由纯数字组成的部分,提取最后_后的数字
+        report_id = parts[-2].split("_")[-1]
         for module, results in module_results.items():
             ytest_db.insert_api_detail(
                 report_id,

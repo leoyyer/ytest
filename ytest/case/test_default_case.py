@@ -148,12 +148,12 @@ if __name__ == "__main__":
                 "--disable-warnings",  # 禁用测试中的警告输出
                 "--tb=short",  # 错误输出的回溯信息格式
                 "-x",  # 遇到第一个失败后立即停止测试
-                f"--alluredir={os.path.join(debug_report_path, 'xml')}",  # 报告的路径
+                f"--alluredir={os.path.join(debug_report_path, 'allure-results')}",  # 报告的路径
             ]
         )
     elif args.date:
         # 生成路径，兼容 Linux 和 Windows
-        date_report_path = os.path.join("report", TestSuite.project, args.conf, args.date, args.report_id, "xml")
+        date_report_path = os.path.join("report", TestSuite.project, args.conf, f"{args.date}_{args.report_id}", "allure-results")
 
         pytest.main(
             [
@@ -175,7 +175,7 @@ if __name__ == "__main__":
         )
     else:
         # 生成路径，兼容 Linux 和 Windows
-        default_report_path = os.path.join("report", TestSuite.project, args.conf, TestSuite.run_case_time, "xml")
+        default_report_path = os.path.join("report", TestSuite.project, args.conf, TestSuite.run_case_time, "allure-results")
 
         pytest.main(
             [
