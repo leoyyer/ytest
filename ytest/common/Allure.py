@@ -179,7 +179,7 @@ class Allure:
         Returns:
             dict: 合并后的 history-trend.json 数据
         """
-        now_trend_path = os.path.join(base_path, current_timestamp, "allure-report", "widgets", "history-trend.json")
+        now_trend_path = os.path.join(base_path, current_timestamp, "allure-report", "history", "history-trend.json")
         with open(now_trend_path, "r", encoding="utf-8") as file:
             now_trend_data = json.load(file)
             now_trend_data[0]["buildOrder"] = current_timestamp
@@ -187,7 +187,7 @@ class Allure:
         current_history_trend = {"items": []}
         # 遍历时间戳文件夹列表
         for timestamp_folder in timestamp_folders:
-            history_trend_path = os.path.join(base_path, timestamp_folder, "allure-report", "widgets", "history-trend.json")
+            history_trend_path = os.path.join(base_path, timestamp_folder, "allure-report", "history", "history-trend.json")
             # 判断文件是否存在
             if not os.path.exists(history_trend_path):
                 continue
