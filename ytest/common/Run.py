@@ -54,8 +54,9 @@ def multi_process_run(project, ytest_folder=None, conf=None):
         pool.map(partial(run, conf=conf, date=now_date, report_id=report_id), case_list)
 
     # 生成 Allure 报告的 Shell 命令
-    cmd = f"allure generate {report_path} -o {report_html_path}"
+    cmd = f"allure generate {report_path} -c -o {report_html_path} --clear"
     shell.invoke(cmd)
+    yallure.add_history_trend(os.path.join("report", project_name, conf_name), f"{now_date}_{report_id}")
 
     # 获取测试结果
     failed = ytest_db.fetch_api_detail(report_id)
@@ -67,14 +68,17 @@ def multi_process_run(project, ytest_folder=None, conf=None):
         # 发送消息
         if int(now_case_conf.get_conf("qywx", "Enable")) == 1 and now_case_conf.get_conf("qywx", "webhook_url"):
             send_message.qywx(now_case_conf.get_conf("qywx", "webhook_url"), all_api, passed, failed, conf_name)
-
-    # 打开 Allure 报告
     open_allure_cmd = (
-        f"lsof -ti :5050 | xargs kill -9 && allure serve {report_path} --host 0.0.0.0 --port 5050"
+        f"lsof -ti :5050 | xargs kill -9 && allure open {report_path.replace('allure-results', 'allure-report')} --host 127.0.0.1 --port 5050"
         if shell.check_port_with_lsof(5050)
-        else f"allure serve {report_path} --host 0.0.0.0 --port 5050"
+        else f"allure open {report_path.replace('allure-results', 'allure-report')} --host 127.0.0.1 --port 5050"
     )
-
+    # allure serve 无法加载趋势图,暂时不使用
+    # open_allure_cmd = (
+    #     f"lsof -ti :5050 | xargs kill -9 && allure serve {report_path} --host 0.0.0.0 --port 5050"
+    #     if shell.check_port_with_lsof(5050)
+    #     else f"allure serve {report_path} --host 127.0.0.1 --port 5050"
+    # )
     shell.invoke(open_allure_cmd)
 
 
