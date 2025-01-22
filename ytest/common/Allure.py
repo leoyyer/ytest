@@ -184,6 +184,7 @@ class Allure:
             now_trend_data = json.load(file)
             now_trend_data[0]["buildOrder"] = current_timestamp
         current_history_trend = {"items": now_trend_data}  # 初始化为最新报告中的执行情况
+        current_history_trend = {"items": []}
         # 遍历时间戳文件夹列表
         for timestamp_folder in timestamp_folders:
             history_trend_path = os.path.join(base_path, timestamp_folder, "allure-report", "widgets", "history-trend.json")
@@ -207,7 +208,8 @@ class Allure:
                                 print(f"Warning: history-trend.json in {timestamp_folder} contains invalid data.")
                     else:
                         print(f"Warning: history-trend.json in {timestamp_folder} is not a list.")
-        return current_history_trend
+        new_history_trend = self.sort_and_filter_build_orders(current_history_trend, count=7)
+        return new_history_trend
 
     def write_history_trend(self, data, base_path, timestamp_folder):
         """_summary_
@@ -229,9 +231,34 @@ class Allure:
             file.write(json_data)
 
     def add_history_trend(self, base_path, current_timestamp):
+        # 创建必要的目录
         timestamp_folders = self.get_previous_timestamp_folders(base_path, current_timestamp)
         merged_history_trend = self.merge_history_trend(base_path, current_timestamp, timestamp_folders)
         self.write_history_trend(merged_history_trend, base_path, current_timestamp)
+
+    def sort_and_filter_build_orders(self, data, count=7):
+        """
+        对历史数据进行排序和去重, 倒叙获取最后指定数量的元素。
+
+        :param data: 包含多个构建记录的字典，格式为 {'items': [...]}
+        :param count: 需要返回的最大元素数量，默认为7
+        :return: 排序后最新的 `count` 条数据
+        """
+        # 确保输入数据为字典，并且包含 'items' 键
+        if not isinstance(data, dict) or "items" not in data or not isinstance(data["items"], list):
+            raise ValueError("输入数据必须是包含 'items' 键的字典，且 'items' 必须是列表")
+
+        # 提取 'items' 列表
+        items = data["items"]
+
+        # 去重，以 buildOrder 作为唯一键，保留最新的
+        unique_data = {entry["buildOrder"]: entry for entry in items}
+
+        # 按 buildOrder 进行倒序排序 (日期_编号)
+        sorted_data = sorted(unique_data.values(), key=lambda x: tuple(map(int, x["buildOrder"].split("_"))), reverse=True)
+
+        # 获取最后 `count` 个结果
+        return {"items": sorted_data[:count]}
 
 
 yallure = Allure()
