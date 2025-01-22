@@ -44,7 +44,6 @@ class Assertions:
         for item in expected_data_list:
             # 处理变量替换
             item = hook_variable.resolve_vars(item, self.global_variable)
-
             # 获取断言类型
             assert_type = item.get("type")
             assert_value = item.get("text")
@@ -59,6 +58,10 @@ class Assertions:
                     elif assert_type in ["mysql", "mongodb"]:
                         # 特殊处理数据库断言
                         assert assertion_map[assert_type](assert_value)
+                    elif assert_type in ["length_equals", "length_equals_greater"]:
+                        # 长度相关,需要传递json
+                        assert_value = item
+                        assert assertion_map[assert_type](data, assert_value)
                     else:
                         # 一般的响应断言
                         assert assertion_map[assert_type](data, assert_value)
