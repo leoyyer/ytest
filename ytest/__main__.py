@@ -8,13 +8,12 @@
 @版本        :1.0
 """
 import click, os, sys
-from ytest.utils.runner.run import multi_process_run, run
-from ytest.utils.initializer.project_initializer import ProjectInitializer
-from ytest.utils.tools.case_bloat import CaseBloat
-from ytest.utils.conf import config
-from ytest.utils.db.sqllife import YtestDatabase
+from ytest.common.Run import multi_process_run, run
+from ytest.initializer.project_initializer import ProjectInitializer
+from ytest.common.CaseBlowUp import CaseBlowUp
+from ytest.conf import config
+from ytest.common.Sqllife import ytest_db
 
-db = YtestDatabase()
 
 __version__ = "1.0.0"
 
@@ -115,7 +114,7 @@ def run_command(project, type, filename, env, process):
 def run_command(project):
     project_initializer = ProjectInitializer(project)
     project_initializer.initialize_project()
-    db._create_tables()
+    ytest_db._create_tables()
 
 
 # 用例膨胀
@@ -128,7 +127,7 @@ def run_command(project):
 def run_command(project, filename, value):
     # 使用三元表达式检查并修改文件名
     filename = filename if filename.endswith(".xlsx") else f"{filename}.xlsx"
-    api_case = CaseBloat(project, filename, value)
+    api_case = CaseBlowUp(project, filename, value)
     api_case.parse_excel_and_generate_tests()
     print(f"执行成功,请重新打开用例{filename}查看")
 

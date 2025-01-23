@@ -17,10 +17,10 @@ setup(
     packages=find_packages(),
     package_data={
         "ytest": [
-            "utils/initializer/demo_suite.xlsx",
-            "utils/initializer/demo_api.xlsx",
-            "utils/templates/json_schema.json",
-            "utils/templates/environment",
+            "templates/demo_suite.xlsx",
+            "templates/demo_api.xlsx",
+            "templates/json_schema.json",
+            "templates/environment",
         ],  # 指定需要打包的文件
     },
     classifiers=[
@@ -70,6 +70,7 @@ setup(
         "openpyxl==3.1.5",
         "pytest-rerunfailures==9.1.1",
         "icecream==2.1.3",
+        "cryptography==44.0.0",
     ],
     entry_points={
         'console_scripts': [

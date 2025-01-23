@@ -47,3 +47,15 @@
 pip install -e .
 
 ✗ ytest run -p fast -t api --env test -f fast_auto_product_screen_1
+
+# debug 仓库包安装
+
+pip install git+https://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:x-oauth-basic@github.com/leoyyer/ytest.git \
+
+# 生产环境安装
+
+pip install git+https://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:x-oauth-basic@https://github.com/leoyyer/ytest-debug.git \
+ --index-url https://mirrors.aliyun.com/pypi/simple \
+ --no-build-isolation
+
+token 设置 在:https://github.com/settings/personal-access-tokens中设置
