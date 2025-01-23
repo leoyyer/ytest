@@ -1,5 +1,5 @@
 FROM python:3.9-alpine
-ENV http_proxy=https://hub-mirror.c.163.com:443
+ENV http_proxy=https://e.dh.mebtte.com:443
 
 
 # 安装系统依赖，包括 Java (openjdk11)，并在使用 unzip 时安装它
