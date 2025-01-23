@@ -42,10 +42,23 @@ def multi_process_run(project, ytest_folder=None, conf=None):
     # 生成测试报告文件夹
     now_date = ytest_time._dateTime()
     report_name = f"{project_name}_{int(time.time())}"
-    report_id = str(ytest_db.insert_report(report_name, project_name, conf, now_date, passed=0, failed=0, skipped=0, error=0))
+    report_id = str(
+        ytest_db.insert_report(
+            report_name,
+            project_name,
+            conf,
+            now_date,
+            passed=0,
+            failed=0,
+            skipped=0,
+            error=0,
+        )
+    )
 
     # 获取报告路径
-    report_path, report_html_path = file_operate.get_report_paths(project_name, conf_name, now_date, report_id)
+    report_path, report_html_path = file_operate.get_report_paths(
+        project_name, conf_name, now_date, report_id
+    )
     yallure.add_environment(project_name, report_path)
     yallure.add_categories(report_path)
 
@@ -56,18 +69,28 @@ def multi_process_run(project, ytest_folder=None, conf=None):
     # 生成 Allure 报告的 Shell 命令
     cmd = f"allure generate {report_path} -c -o {report_html_path} --clear"
     shell.invoke(cmd)
-    yallure.add_history_trend(os.path.join("report", project_name, conf_name), f"{now_date}_{report_id}")
+    yallure.add_history_trend(
+        os.path.join("report", project_name, conf_name), f"{now_date}_{report_id}"
+    )
 
     # 获取测试结果
     failed = ytest_db.fetch_api_detail(report_id)
     all_api = ytest_db.fetch_api_all(report_id)
     passed = ytest_db.fetch_api_pass_all(report_id)
+    # 更新执行结果到数据库
+    ytest_db.update_report(report_id, failed)
+    # 发送消息
+    if int(now_case_conf.get_conf("qywx", "Enable")) == 1 and now_case_conf.get_conf(
+        "qywx", "webhook_url"
+    ):
+        send_message.qywx(
+            now_case_conf.get_conf("qywx", "webhook_url"),
+            all_api,
+            passed,
+            failed,
+            conf_name,
+        )
 
-    if int(failed) > 0:
-        ytest_db.update_report(report_id, failed)
-        # 发送消息
-        if int(now_case_conf.get_conf("qywx", "Enable")) == 1 and now_case_conf.get_conf("qywx", "webhook_url"):
-            send_message.qywx(now_case_conf.get_conf("qywx", "webhook_url"), all_api, passed, failed, conf_name)
     open_allure_cmd = (
         f"lsof -ti :5050 | xargs kill -9 && allure open {report_path.replace('allure-results', 'allure-report')} --host 127.0.0.1 --port 5050"
         if shell.check_port_with_lsof(5050)
