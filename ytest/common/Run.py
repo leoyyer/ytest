@@ -79,6 +79,7 @@ def multi_process_run(project, ytest_folder=None, conf=None):
     passed = ytest_db.fetch_api_pass_all(report_id)
     # 更新执行结果到数据库
     ytest_db.update_report(report_id, failed)
+    ytest_db.close()
     # 发送消息
     if int(now_case_conf.get_conf("qywx", "Enable")) == 1 and now_case_conf.get_conf(
         "qywx", "webhook_url"
