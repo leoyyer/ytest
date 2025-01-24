@@ -16,6 +16,7 @@ from datetime import datetime, timedelta
 class YtestDatabase:
     def __init__(self, db_name="ytest.db"):
         self.db_name = db_name
+        # 开启线程模式,支撑多线程执行
         self.conn = sqlite3.connect(self.db_name,check_same_thread=False)
         self.cursor = self.conn.cursor()
         self._create_tables()
