@@ -16,7 +16,7 @@ from datetime import datetime, timedelta
 class YtestDatabase:
     def __init__(self, db_name="ytest.db"):
         self.db_name = db_name
-        self.conn = sqlite3.connect(self.db_name,timeout=10)
+        self.conn = sqlite3.connect(self.db_name,check_same_thread=False)
         self.cursor = self.conn.cursor()
         self._create_tables()
 
