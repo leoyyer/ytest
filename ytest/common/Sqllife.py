@@ -124,13 +124,32 @@ class YtestDatabase:
 
     def fetch_api_all(self, report_id):
         """根据 report_id 查询 api_detail 表中的所有值"""
-        self.cursor.execute("SELECT count(1) FROM api_detail WHERE report_id = ?", (report_id,))
+        query = """
+        SELECT
+           COUNT(CASE WHEN skipped > 0 THEN 1 END) +
+           COUNT(CASE WHEN failed > 0 THEN 1 END) +
+           COUNT(CASE WHEN passed = 1 THEN 1 END) +
+           COUNT(CASE WHEN passed = 2 THEN 1 END) * 2 +
+           COUNT(CASE WHEN passed = 3 THEN 1 END) * 3 AS total_value
+        FROM api_detail
+        WHERE report_id = ?
+        """
+        self.cursor.execute(query, (report_id,))
         result = self.cursor.fetchone()  # 使用 fetchone 获取单个值
         return result[0] if result and result[0] is not None else 0  # 处理 None 的情况
 
+
     def fetch_api_pass_all(self, report_id):
         """根据 report_id 查询 api_detail 表中的所有值"""
-        self.cursor.execute("SELECT count(1) FROM api_detail WHERE report_id = ? and passed > 0 ", (report_id,))
+        query = """
+        SELECT
+           COUNT(CASE WHEN passed = 1 THEN 1 END) +
+           COUNT(CASE WHEN passed = 2 THEN 1 END) * 2 +
+           COUNT(CASE WHEN passed = 3 THEN 1 END) * 3 AS total_value
+        FROM api_detail
+        WHERE report_id = ?
+        """
+        self.cursor.execute(query, (report_id,))
         result = self.cursor.fetchone()  # 使用 fetchone 获取单个值
         return result[0] if result and result[0] is not None else 0  # 处理 None 的情况
 
